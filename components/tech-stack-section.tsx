@@ -95,7 +95,7 @@ export function TechStackSection() {
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              animation: `float ${10 + i * 2}s infinite ease-in-out`
+              animation: `float ${10 + i * 1}s infinite ease-in-out`
             }}
           />
         ))}

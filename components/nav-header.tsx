@@ -14,8 +14,9 @@ export function NavHeader() {
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const [isHovered, setIsHovered] = useState(false)
   const [letterHovered, setLetterHovered] = useState(-1)
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true)
 
-  const portfolioText = "Samrath.dev"
+  const portfolioText = "Samrath"
 
   // Add window width tracking
   useEffect(() => {
@@ -54,6 +55,18 @@ export function NavHeader() {
     }
   }, [])
 
+  // Add scroll handler for mobile view
+  useEffect(() => {
+    const handleScroll = () => {
+      if (windowWidth < 768) { // Check if in mobile view
+        setIsNavbarVisible(window.scrollY < 50); // Show navbar if scrolled less than 50px
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [windowWidth]);
+
   return (
     <div className={cn(
       "fixed left-0 top-0 w-full z-50 flex justify-center pt-2 md:pt-0 transition-all duration-300"
@@ -67,7 +80,13 @@ export function NavHeader() {
         }}
       >
         <nav
-          className="relative w-full rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 md:transition-all md:duration-300"
+          className={cn(
+            "relative w-full rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 md:transition-all md:duration-300 transition-opacity duration-300 ease-in-out transform",
+            { 
+              "opacity-0 translate-y-[-100%]": !isNavbarVisible && windowWidth < 768, // Hide navbar with transition
+              "opacity-100 translate-y-0": isNavbarVisible && windowWidth < 768 // Show navbar
+            }
+          )}
           style={
             windowWidth >= 768
               ? {
