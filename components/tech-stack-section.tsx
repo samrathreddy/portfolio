@@ -40,7 +40,7 @@ const techStack = [
   },
   {
     name: "Next.js",
-    icon: "/portfolio/tech/nextjs.svg",
+    icon: "/portfolio/tech/nextJs.svg",
     category: "Frontend"
   },
   {
