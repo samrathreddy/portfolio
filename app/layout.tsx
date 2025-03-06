@@ -34,6 +34,7 @@ export default function RootLayout({
           style={{ marginBottom: "20px" }}
         />
       </body>
+      <Analytics />
     </html>
   )
 }
