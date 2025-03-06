@@ -54,7 +54,3 @@ portfolio/
 - TailwindCSS
 - Framer Motion
 - Hero Icons
-
-## License
-
-MIT 
