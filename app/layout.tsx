@@ -2,7 +2,6 @@ import "./global.css"
 import { Inter } from "next/font/google"
 import { ReactQueryProvider } from "@/lib/react-query/provider"
 import { Analytics } from "@vercel/analytics/react"
-import mixpanel from 'mixpanel-browser'
 import type { Metadata } from "next"
 import { Toaster } from "sonner"
 
