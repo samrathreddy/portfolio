@@ -15,6 +15,20 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    id: "day-code",
+    subtitle: "Code Activity Tracker",
+    title: "Day Code",
+    description: "Day Code is a web application that allows users to track their daily code activity with leetcode and github api integration, even know and set reminders about the codeforces, codechef, leetcode contests along with google calendar integration, also know about the upcoming hackathons.",
+    preview: "https://daycode.vercel.app/",
+    tech: ["React", "API Integrations", "GraphQL", "Typescript", "Tailwind CSS", "Local Storage", "Vercel"],
+    links: {
+      website: "https://daycode.vercel.app/",
+      github: "https://github.com/samrathreddy",
+      video: "https://www.linkedin.com/posts/samrath-reddy_attention-coders-whether-youre-a-dsa-activity-7307755723109580800-0b-H?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD2VzSEBqolc3AY61MDI9xdX1-_3h_Dtyb0"
+    },
+    color: "from-[#10B981] to-[#059669]"
+  },
+  {
     id: "mail-domain",
     subtitle: "Domain Categorizer",
     title: "Email Domain Checker",
