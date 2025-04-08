@@ -29,6 +29,20 @@ export const projects: Project[] = [
     color: "from-[#10B981] to-[#059669]"
   },
   {
+    id: "leet-ai",
+    subtitle: "Leetcode AI Agent",
+    title: "Leet AI",
+    description: "Leet AI is a web application that allows users to solve leetcode problems without providing any code, just by describing the problem in natural language. Along with github integration to commit the code to the user's github repository.",
+    preview: "https://www.linkedin.com/feed/update/urn:li:activity:7311041179695886336/",
+    tech: ["React", "API Integrations", "OpenAI", "MongoDB", "Github", "Local Storage", "Extensions"],
+    links: {
+      website: "https://www.linkedin.com/feed/update/urn:li:activity:7311041179695886336/",
+      github: "https://github.com/samrathreddy",
+      video: "https://www.linkedin.com/feed/update/urn:li:activity:7311041179695886336/"
+    },
+    color: "from-[#10B981] to-[#059669]"
+  },
+  {
     id: "mail-domain",
     subtitle: "Domain Categorizer",
     title: "Email Domain Checker",
