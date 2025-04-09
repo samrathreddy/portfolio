@@ -43,6 +43,20 @@ export const projects: Project[] = [
     color: "from-[#10B981] to-[#059669]"
   },
   {
+    id: "cybernauts-cvr",
+    subtitle: "Cybernauts CVR Showcase website",
+    title: "Cybernauts CVR",
+    description: "Made a website for a college club to showcase the club events and team members.",
+    preview: "https://cybernautscvr.vercel.app/",
+    tech: ["React", "Typescript", "Tailwind CSS"],
+    links: {
+      website: "https://cybernautscvr.vercel.app/",
+      github: "https://github.com/samrathreddy/cybernauts",
+      video: "https://www.linkedin.com/feed/update/urn:li:activity:7313286042671804418/"
+    },
+    color: "from-[#10B981] to-[#059669]"
+  },
+  {
     id: "mail-domain",
     subtitle: "Domain Categorizer",
     title: "Email Domain Checker",
