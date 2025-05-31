@@ -25,7 +25,7 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-dot-white/[0.2]">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-dot-white/[0.2] pt-16 sm:pt-0">
       {/* Radial gradient for the container to give a faded look */}
       <div className="absolute pointer-events-none inset-0 flex items-center justify-center bg-background [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
       
@@ -37,7 +37,7 @@ export function HeroSection() {
       </div>
 
       {/* Hero Content */}
-      <div className="relative px-4 text-center mt-[-5vh]">
+      <div className="relative px-4 text-center mt-[5vh]">
         <div className="space-y-4">
           {/* Flipping text badge */}
           <div className="inline-block perspective-1000">
@@ -97,7 +97,7 @@ export function HeroSection() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-fade-in delay-500">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-fade-in delay-500 hidden sm:block">
         <div className="flex flex-col items-center gap-2">
           <span className="text-sm text-muted-foreground">Scroll to explore</span>
           <div className="w-[2px] h-8 bg-gradient-to-b from-primary to-transparent" />
