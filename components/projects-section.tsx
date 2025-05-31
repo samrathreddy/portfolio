@@ -296,10 +296,15 @@ export function ProjectsSection({
                             <button 
                               className="p-1.5 rounded-md hover:bg-white/5 transition-colors"
                               onClick={() => {
-                                const iframe = document.getElementById(`preview-${project.id}`) as HTMLIFrameElement;
-                                if (iframe) {
-                                  setLoadedIframes(prev => ({ ...prev, [project.id]: false }))
-                                  iframe.src = iframe.src;
+                                const element = document.getElementById(`preview-${project.id}`) as HTMLIFrameElement | HTMLVideoElement;
+                                if (element) {
+                                  setLoadedIframes(prev => ({ ...prev, [project.id]: false }));
+                                  if (element instanceof HTMLVideoElement) {
+                                    element.load();
+                                    element.play();
+                                  } else if (element instanceof HTMLIFrameElement) {
+                                    element.src = element.src;
+                                  }
                                 }
                               }}
                             >
@@ -329,18 +334,33 @@ export function ProjectsSection({
                           )}
                           {isClient && (
                             <div className="relative w-full h-full overflow-hidden bg-white">
-                              <iframe
-                                id={`preview-${project.id}`}
-                                src={project.preview}
-                                className="absolute top-0 left-0 w-full h-full scale-[0.7] origin-top-left transition-all duration-500 group-hover:filter-none filter blur-[2px]"
-                                style={{
-                                  width: '143%',
-                                  height: '143%',
-                                }}
-                                onLoad={() => {
-                                  setLoadedIframes(prev => ({ ...prev, [project.id]: true }))
-                                }}
-                              />
+                              {project.preview.match(/\.(mp4|mov|webm)$/) || project.preview.includes('/projects/') ? (
+                                <video
+                                  id={`preview-${project.id}`}
+                                  src={project.preview}
+                                  className="absolute top-0 left-0 w-full h-full object-cover transition-all duration-500 group-hover:filter-none filter blur-[2px]"
+                                  autoPlay
+                                  muted
+                                  loop
+                                  playsInline
+                                  onLoadedData={() => {
+                                    setLoadedIframes(prev => ({ ...prev, [project.id]: true }))
+                                  }}
+                                />
+                              ) : (
+                                <iframe
+                                  id={`preview-${project.id}`}
+                                  src={project.preview}
+                                  className="absolute top-0 left-0 w-full h-full scale-[0.7] origin-top-left transition-all duration-500 group-hover:filter-none filter blur-[2px]"
+                                  style={{
+                                    width: '143%',
+                                    height: '143%',
+                                  }}
+                                  onLoad={() => {
+                                    setLoadedIframes(prev => ({ ...prev, [project.id]: true }))
+                                  }}
+                                />
+                              )}
                             </div>
                           )}
                         </div>

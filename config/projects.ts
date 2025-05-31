@@ -23,7 +23,7 @@ export const projects: Project[] = [
     tech: ["React", "API Integrations", "GraphQL", "Typescript", "Tailwind CSS", "Local Storage", "Vercel"],
     links: {
       website: "https://daycode.vercel.app/",
-      github: "https://github.com/samrathreddy",
+      github: "https://github.com/samrathreddy/Daycode",
       video: "https://www.linkedin.com/posts/samrath-reddy_attention-coders-whether-youre-a-dsa-activity-7307755723109580800-0b-H?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD2VzSEBqolc3AY61MDI9xdX1-_3h_Dtyb0"
     },
     color: "from-[#10B981] to-[#059669]"
@@ -31,9 +31,9 @@ export const projects: Project[] = [
   {
     id: "leet-ai",
     subtitle: "Leetcode AI Agent",
-    title: "Leet AI",
-    description: "Leet AI is a web application that allows users to solve leetcode problems without providing any code, just by describing the problem in natural language. Along with github integration to commit the code to the user's github repository.",
-    preview: "https://www.linkedin.com/feed/update/urn:li:activity:7311041179695886336/",
+    title: "Leet AI (Unpublished)",
+    description: "Leet AI is a extension that allows users to solve leetcode problems without providing any code, just by describing the problem in natural language. Along with github integration to commit the code to the user's github repository.",
+    preview: "/portfolio/project/leetai.mp4",
     tech: ["React", "API Integrations", "OpenAI", "MongoDB", "Github", "Local Storage", "Extensions"],
     links: {
       website: "https://www.linkedin.com/feed/update/urn:li:activity:7311041179695886336/",
