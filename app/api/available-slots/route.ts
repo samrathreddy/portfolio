@@ -160,25 +160,31 @@ export async function GET(request: Request) {
 // Helper function to generate all possible time slots for a day
 function generateTimeSlots(date: Date, slotDuration: number) {
   const slots = [];
-  const dayStart = startOfDay(date);
   const now = new Date();
   
-  // Availability window: 8PM to 12AM
+  // Ensure we're working with IST timezone for the availability window
+  const istDate = toZonedTime(date, ADMIN_TIMEZONE);
+  const dayStart = startOfDay(istDate);
+  
+  // Availability window: 8PM to 12AM IST
   const windowStart = new Date(dayStart);
-  windowStart.setHours(20, 0, 0, 0); // Start at 8 PM
+  windowStart.setHours(20, 0, 0, 0); // Start at 8 PM IST
   
   const windowEnd = new Date(dayStart);
-  windowEnd.setHours(0, 0, 0, 0); // End at 12 AM (midnight)
+  windowEnd.setHours(0, 0, 0, 0); // End at 12 AM (midnight) IST
   windowEnd.setDate(windowEnd.getDate() + 1); // Move to next day
+  
+  // Convert current time to IST for comparison
+  const nowInIST = toZonedTime(now, ADMIN_TIMEZONE);
   
   // Use the provided duration as the increment
   const slotIncrement = slotDuration; // minutes
   
-  // Generate slots for the window (8PM to 12AM)
+  // Generate slots for the window (8PM to 12AM IST)
   let current = new Date(windowStart);
   while (current < windowEnd) {
-    // Only include future slots
-    if (isAfter(current, now)) {
+    // Only include future slots (compare in IST)
+    if (isAfter(current, nowInIST)) {
       const slotEnd = addMinutes(current, slotDuration);
       
       // Only add slot if it ends before or at the end time
@@ -201,22 +207,28 @@ function generateTimeSlots(date: Date, slotDuration: number) {
 // Fallback function for development/testing
 function generateFakeAvailableSlots(date: Date, duration: number) {
   const slots = [];
-  const dayStart = startOfDay(date);
   const now = new Date();
   
-  // Availability window: 8PM to 12AM
+  // Ensure we're working with IST timezone for the availability window
+  const istDate = toZonedTime(date, ADMIN_TIMEZONE);
+  const dayStart = startOfDay(istDate);
+  
+  // Availability window: 8PM to 12AM IST
   const windowStart = new Date(dayStart);
-  windowStart.setHours(20, 0, 0, 0); // Start at 8 PM
+  windowStart.setHours(20, 0, 0, 0); // Start at 8 PM IST
   
   const windowEnd = new Date(dayStart);
-  windowEnd.setHours(0, 0, 0, 0); // End at 12 AM (midnight)
+  windowEnd.setHours(0, 0, 0, 0); // End at 12 AM (midnight) IST
   windowEnd.setDate(windowEnd.getDate() + 1); // Move to next day
   
-  // Generate slots for the window (8PM to 12AM)
+  // Convert current time to IST for comparison
+  const nowInIST = toZonedTime(now, ADMIN_TIMEZONE);
+  
+  // Generate slots for the window (8PM to 12AM IST)
   let current = new Date(windowStart);
   while (current < windowEnd) {
-    // Only include future slots
-    if (isAfter(current, now)) {
+    // Only include future slots (compare in IST)
+    if (isAfter(current, nowInIST)) {
       // Randomly mark some slots as unavailable (for demo purposes)
       const available = Math.random() > 0.3;
       

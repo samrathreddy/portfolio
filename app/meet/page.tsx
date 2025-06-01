@@ -176,28 +176,26 @@ export default function MeetPage() {
           )}
 
           {/* Progress Steps */}
-          <div className="flex flex-col sm:flex-row mb-8 space-y-4 sm:space-y-0">
+          <div className="flex flex-row mb-8 space-x-2 sm:space-x-4">
             <div className={`flex items-center ${step >= 1 ? 'text-primary' : 'text-gray-600'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= 1 ? 'bg-primary text-black' : 'bg-gray-800'}`}>
                 1
               </div>
-              <span className="ml-2 text-sm sm:text-base">Select Time</span>
+              <span className="ml-2 text-xs sm:text-base">Select Time</span>
             </div>
-            <div className="hidden sm:block mx-4 border-t border-gray-700 flex-1 self-center"></div>
-            <div className="sm:hidden ml-4 border-l border-gray-700 h-6 self-start mt-2"></div>
+            <div className="border-t border-gray-700 flex-1 self-center mx-2 sm:mx-4"></div>
             <div className={`flex items-center ${step >= 2 ? 'text-primary' : 'text-gray-600'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= 2 ? 'bg-primary text-black' : 'bg-gray-800'}`}>
                 2
               </div>
-              <span className="ml-2 text-sm sm:text-base">Your Details</span>
+              <span className="ml-2 text-xs sm:text-base">Your Details</span>
             </div>
-            <div className="hidden sm:block mx-4 border-t border-gray-700 flex-1 self-center"></div>
-            <div className="sm:hidden ml-4 border-l border-gray-700 h-6 self-start mt-2"></div>
+            <div className="border-t border-gray-700 flex-1 self-center mx-2 sm:mx-4"></div>
             <div className={`flex items-center ${step >= 3 ? 'text-primary' : 'text-gray-600'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= 3 ? 'bg-primary text-black' : 'bg-gray-800'}`}>
                 3
               </div>
-              <span className="ml-2 text-sm sm:text-base">Confirmation</span>
+              <span className="ml-2 text-xs sm:text-base">Confirmation</span>
             </div>
           </div>
 
@@ -361,7 +359,7 @@ export default function MeetPage() {
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Time:</span>
-                  <span>{selectedTime ? format(selectedTime, "h:mm a") : ""}</span>
+                  <span>{displayTime ? format(displayTime, "h:mm a") : ""}</span>
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Timezone:</span>
@@ -395,7 +393,7 @@ export default function MeetPage() {
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Time:</span>
-                  <span>{selectedTime ? format(selectedTime, "h:mm a") : ""}</span>
+                  <span>{displayTime ? format(displayTime, "h:mm a") : ""}</span>
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Timezone:</span>
