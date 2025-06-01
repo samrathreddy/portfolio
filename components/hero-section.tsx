@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Mail } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 
@@ -77,19 +77,18 @@ export function HeroSection() {
           <br></br>
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 mt-16 justify-center animate-fade-in-up delay-300">
-            <Link href="#projects">
+            <Link href="/meet">
               <Button size="lg" className="relative group px-8">
                 <span className="absolute -inset-0.5 bg-gradient-to-r from-primary via-yellow-500 to-primary rounded-lg blur opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-xy"></span>
                 <span className="relative flex items-center">
-                  View Projects
+                  Schedule a call
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </Button>
             </Link>
-            <Link href="#contact">
+            <Link href="#projects">
               <Button size="lg" variant="outline" className="group px-8">
-                Contact Me
-                <Mail className="ml-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                View Projects
               </Button>
             </Link>
           </div>
