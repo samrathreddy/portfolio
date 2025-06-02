@@ -169,7 +169,7 @@ export default function MeetPage() {
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center p-4">
       <div className="max-w-4xl w-full bg-gray-900 rounded-xl shadow-xl overflow-hidden">
         <div className="p-8">
-          <h1 className="text-3xl font-bold mb-2">Schedule a call</h1>
+          <h1 className="text-3xl font-bold mb-2">Schedule a meet</h1>
           <p className="text-gray-400 mb-8">Select a time to chat about projects, ideas, or questions.</p>
 
           {error && (
@@ -385,7 +385,7 @@ export default function MeetPage() {
               
               <h2 className="text-2xl font-bold mb-2">Meeting Scheduled!</h2>
               <p className="text-gray-400 mb-6">
-                You're all set! Please check google calendar for the meeting details.
+                Thanks for scheduling a meet. Excited to have a discussion with you. I have sent a confirmation email to {formData.email} with all the details.
               </p>
               
               <div className="bg-gray-800 p-6 rounded-lg mb-6">

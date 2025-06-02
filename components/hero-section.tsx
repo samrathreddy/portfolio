@@ -81,7 +81,7 @@ export function HeroSection() {
               <Button size="lg" className="relative group px-8">
                 <span className="absolute -inset-0.5 bg-gradient-to-r from-primary via-yellow-500 to-primary rounded-lg blur opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-xy"></span>
                 <span className="relative flex items-center">
-                  Schedule a call
+                  Schedule a meet
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </Button>

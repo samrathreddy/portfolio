@@ -69,6 +69,7 @@ async function getCalendarClient(): Promise<calendar_v3.Calendar> {
 
 /**
  * Create a Google Calendar event with Google Meet link
+ * Automatically sends invitation emails to all attendees
  * @param eventDetails Event details
  * @returns Created event with Meet link
  */
@@ -111,13 +112,12 @@ export async function createGoogleCalendarEvent(eventDetails: {
       calendarId: 'primary',
       requestBody: event,
       conferenceDataVersion: 1,
+      sendUpdates: 'all', // Automatically send invitation emails to all guests
     });
     
     return response.data;
   } catch (error) {
     console.error('Error creating Google Calendar event:', error);
-    
-    // For development, return a ock event
     
     throw error;
   }
@@ -125,6 +125,7 @@ export async function createGoogleCalendarEvent(eventDetails: {
 
 /**
  * Update a Google Calendar event
+ * Automatically sends notification emails to all attendees about the changes
  * @param eventId ID of the event to update
  * @param eventDetails Updated event details
  * @returns Updated event
@@ -175,14 +176,6 @@ export async function updateGoogleCalendarEvent(eventId: string, eventDetails: {
   } catch (error) {
     console.error('Error updating Google Calendar event:', error);
     
-    // For development, return a mock event
-    if (process.env.NODE_ENV === 'development') {
-      return {
-        id: eventId,
-        hangoutLink: 'https://meet.google.com/abc-defg-hij',
-        htmlLink: 'https://calendar.google.com/calendar/event?eid=123',
-      };
-    }
     
     throw error;
   }
@@ -190,6 +183,7 @@ export async function updateGoogleCalendarEvent(eventId: string, eventDetails: {
 
 /**
  * Delete a Google Calendar event
+ * Automatically sends cancellation emails to all attendees
  * @param eventId ID of the event to delete
  */
 export async function deleteGoogleCalendarEvent(eventId: string) {
@@ -206,10 +200,6 @@ export async function deleteGoogleCalendarEvent(eventId: string) {
   } catch (error) {
     console.error('Error deleting Google Calendar event:', error);
     
-    // For development, just return success
-    if (process.env.NODE_ENV === 'development') {
-      return true;
-    }
     
     throw error;
   }
