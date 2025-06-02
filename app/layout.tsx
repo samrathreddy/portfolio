@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Samrath Reddy | Full Stack Developer Portfolio & Projects",
     description: "Discover Samrath Reddy's personal portfolio: Full Stack Developer skilled in React, Node.js, TypeScript, and modern web technologies. Explore projects, skills, tech stack, and professional experience.",
-    url: "https://samrath.dev/", // Update to your actual domain
+    url: "https://samrathdev.vercel.app/", // Update to your actual domain
     siteName: "Samrath Reddy Portfolio",
     images: [
       {

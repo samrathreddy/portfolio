@@ -30,7 +30,7 @@ export async function DELETE(request: Request) {
     }
     
     // Validate the meeting exists and the token is correct
-    const meeting = await getMeetingById(meetingId);
+    const meeting = await getMeetingById(meetingId!);
     
     if (!meeting) {
       return NextResponse.json(
@@ -39,7 +39,7 @@ export async function DELETE(request: Request) {
       );
     }
     
-    if (cancelToken && meeting.cancelToken !== cancelToken) {
+    if (cancelToken && meeting!.cancelToken !== cancelToken) {
       return NextResponse.json(
         { error: 'Invalid cancellation token' },
         { status: 403 }
@@ -47,28 +47,28 @@ export async function DELETE(request: Request) {
     }
     
     // Get the user's timezone from the original booking
-    const userTimezone = meeting.timezone || ADMIN_TIMEZONE;
+    const userTimezone = meeting!.timezone || ADMIN_TIMEZONE;
     
     // Delete the event from Google Calendar
     try {
-      await deleteGoogleCalendarEvent(meeting.eventId);
+      await deleteGoogleCalendarEvent(meeting!.eventId);
     } catch (error) {
       console.error('Error deleting Google Calendar event:', error);
       // Continue with cancellation even if Google Calendar deletion fails
     }
     
     // Update the meeting status in the database
-    await updateMeeting(meetingId, { 
+    await updateMeeting(meetingId!, { 
       status: 'canceled', 
       canceledAt: new Date().toISOString() 
     });
     
     // Send cancellation email
     try {
-      await sendMeetingCancelledEmail(meeting.email, {
-        name: meeting.name,
-        dateTime: meeting.dateTime,
-        duration: meeting.duration,
+      await sendMeetingCancelledEmail(meeting!.email, {
+        name: meeting!.name,
+        dateTime: meeting!.dateTime,
+        duration: meeting!.duration,
         timezone: userTimezone // Include the user's timezone
       });
     } catch (error) {

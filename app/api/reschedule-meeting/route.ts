@@ -44,7 +44,7 @@ export async function PATCH(request: Request) {
       );
     }
     
-    if (token && meeting.rescheduleToken !== token) {
+    if (token && meeting!.rescheduleToken !== token) {
       return NextResponse.json(
         { error: 'Invalid reschedule token' },
         { status: 403 }
@@ -53,14 +53,14 @@ export async function PATCH(request: Request) {
     
     // Parse the new date time - this is already the adminStart time from available slots
     const userStartTime = new Date(newDateTime);
-    const userEndTime = addMinutes(userStartTime, meeting.duration);
+    const userEndTime = addMinutes(userStartTime, meeting!.duration);
     
     // Get the user's timezone from the original booking
-    const userTimezone = meeting.timezone || ADMIN_TIMEZONE;
+    const userTimezone = meeting!.timezone || ADMIN_TIMEZONE;
     
     // Update the event in Google Calendar (already in admin timezone)
     try {
-      const updatedEvent = await updateGoogleCalendarEvent(meeting.eventId, {
+      const updatedEvent = await updateGoogleCalendarEvent(meeting!.eventId, {
         startTime: userStartTime,
         endTime: userEndTime,
         timezone: ADMIN_TIMEZONE // Always use admin timezone for Google Calendar
@@ -75,16 +75,16 @@ export async function PATCH(request: Request) {
       });
       
       // Send rescheduled email notification (with user's timezone)
-      await sendMeetingRescheduledEmail(meeting.email, {
-        id: meeting.id,
-        name: meeting.name,
+      await sendMeetingRescheduledEmail(meeting!.email, {
+        id: meeting!.id,
+        name: meeting!.name,
         dateTime: userStartTime.toISOString(), // Send in user's timezone
-        duration: meeting.duration,
-        purpose: meeting.purpose,
-        meetLink: meeting.meetLink,
-        calendarLink: `https://calendar.google.com/calendar/event?eid=${meeting.eventId}`,
-        rescheduleLink: `${process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL || 'http://localhost:3000'}/meet/reschedule?id=${meeting.id}&token=${meeting.rescheduleToken}`,
-        cancelLink: `${process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL || 'http://localhost:3000'}/meet/cancel?id=${meeting.id}&token=${meeting.cancelToken}`,
+        duration: meeting!.duration,
+        purpose: meeting!.purpose,
+        meetLink: meeting!.meetLink,
+        calendarLink: `https://calendar.google.com/calendar/event?eid=${meeting!.eventId}`,
+        rescheduleLink: `${process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL || 'http://localhost:3000'}/meet/reschedule?id=${meeting!.id}&token=${meeting!.rescheduleToken}`,
+        cancelLink: `${process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL || 'http://localhost:3000'}/meet/cancel?id=${meeting!.id}&token=${meeting!.cancelToken}`,
         timezone: userTimezone // Include user's timezone
       });
       
@@ -93,7 +93,7 @@ export async function PATCH(request: Request) {
         success: true,
         meetingId,
         newDateTime: userStartTime.toISOString(),
-        meetLink: meeting.meetLink,
+        meetLink: meeting!.meetLink,
         message: 'Meeting successfully rescheduled',
         timezone: userTimezone
       });
@@ -109,7 +109,7 @@ export async function PATCH(request: Request) {
           success: true,
           meetingId,
           newDateTime,
-          meetLink: meeting.meetLink,
+          meetLink: meeting!.meetLink,
           message: 'Meeting successfully rescheduled (mock response)',
           note: 'Using mock data due to Google Calendar API error',
           timezone: userTimezone
