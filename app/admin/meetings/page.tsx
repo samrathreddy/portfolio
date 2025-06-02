@@ -109,7 +109,7 @@ export default function AdminMeetingsPage() {
                     <td className="border border-gray-700 px-4 py-3 text-gray-100">{meeting.name}</td>
                     <td className="border border-gray-700 px-4 py-3 text-gray-100">{meeting.email}</td>
                     <td className="border border-gray-700 px-4 py-3 text-gray-100">
-                      {format(new Date(meeting.dateTime), 'MMM d, yyyy h:mm a')}
+                      {format(new Date(meeting.adminDateTime), 'MMM d, yyyy h:mm a')}
                     </td>
                     <td className="border border-gray-700 px-4 py-3 text-gray-100">{meeting.duration}min</td>
                     <td className="border border-gray-700 px-4 py-3">
