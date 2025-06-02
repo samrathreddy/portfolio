@@ -41,6 +41,9 @@ export default function MeetingDetailPage() {
         const response = await fetch(`/api/meetings/${id}`);
         
         if (!response.ok) {
+          if(response.status === 403) {
+            throw new Error('Access denied: IP not authorized');
+          } 
           throw new Error('Failed to fetch meeting details');
         }
         
@@ -48,8 +51,7 @@ export default function MeetingDetailPage() {
         setMeeting(data.meeting);
         setError(null);
       } catch (err) {
-        setError('Failed to load meeting details');
-        console.error(err);
+        setError(err instanceof Error ? err.message : 'Failed to load meeting details');
       } finally {
         setIsLoading(false);
       }

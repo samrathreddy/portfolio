@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import { listMeetings } from '@/lib/db';
+import { isAllowedIP } from '@/lib/ip-security';
 
 export async function GET(request: Request) {
+  // Check IP authorization first
+  if (!isAllowedIP(request)) {
+    return NextResponse.json(
+      { error: 'Access denied: IP not authorized' },
+      { status: 403 }
+    );
+  }
   try {
     const { searchParams } = new URL(request.url);
     

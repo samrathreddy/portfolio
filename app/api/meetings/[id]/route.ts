@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server';
 import { getMeetingById } from '@/lib/db';
+import { isAllowedIP } from '@/lib/ip-security';
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  // Check IP authorization first
+  if (!isAllowedIP(request)) {
+    return NextResponse.json(
+      { error: 'Access denied: IP not authorized' },
+      { status: 403 }
+    );
+  }
   try {
     const id = params.id;
     
@@ -45,6 +53,14 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  // Check IP authorization first
+  if (!isAllowedIP(request)) {
+    return NextResponse.json(
+      { error: 'Access denied: IP not authorized' },
+      { status: 403 }
+    );
+  }
+
   try {
     const id = params.id;
     const { searchParams } = new URL(request.url);

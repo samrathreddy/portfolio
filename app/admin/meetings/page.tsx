@@ -34,6 +34,9 @@ export default function AdminMeetingsPage() {
       const response = await fetch(`/api/meetings${filter}`);
       
       if (!response.ok) {
+        if(response.status === 403) {
+          throw new Error('Access denied: IP not authorized');
+        }
         throw new Error('Failed to fetch meetings');
       }
       
@@ -41,8 +44,7 @@ export default function AdminMeetingsPage() {
       setMeetings(data.meetings || []);
       setError(null);
     } catch (err) {
-      setError('Failed to load meetings');
-      console.error(err);
+      setError(err instanceof Error ? err.message : 'Failed to load meetings');
     } finally {
       setIsLoading(false);
     }

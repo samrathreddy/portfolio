@@ -15,6 +15,9 @@ const ADMIN_TIMEZONE = 'Asia/Kolkata'; // IST
 
 export async function DELETE(request: Request) {
   try {
+    return NextResponse.json({
+      error: 'Under Development',
+    }, { status: 500 });
     const { searchParams } = new URL(request.url);
     const meetingId = searchParams.get('meetingId');
     const cancelToken = searchParams.get('token');

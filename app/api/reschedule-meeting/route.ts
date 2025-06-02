@@ -21,6 +21,9 @@ const ADMIN_TIMEZONE = 'Asia/Kolkata'; // IST
 
 export async function PATCH(request: Request) {
   try {
+    return NextResponse.json({
+      error: 'Under Development',
+    }, { status: 500 });
     const body = await request.json();
     const { meetingId, newDateTime, token } = body;
     
