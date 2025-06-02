@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server';
-import { startOfDay, endOfDay, addMinutes, format, isAfter, parseISO, isBefore } from 'date-fns';
-import { toZonedTime } from 'date-fns-tz';
+import { addMinutes, format, parseISO } from 'date-fns';
+import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 import { getGoogleCalendarAuth } from '@/lib/google';
 import { google } from 'googleapis';
 
 // Admin timezone - all slots are calculated in this timezone first
-const ADMIN_TIMEZONE = process.env.ADMIN_TIMEZONE || 'Asia/Kolkata'; // IST
+const ADMIN_TIMEZONE = 'Asia/Kolkata'; // IST
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const dateParam = searchParams.get('date');
     const durationParam = searchParams.get('duration');
-    const timezone = searchParams.get('timezone') || ADMIN_TIMEZONE; // Default to IST if not provided
+    const timezone = searchParams.get('timezone') || ADMIN_TIMEZONE;
     
     if (!dateParam) {
       return NextResponse.json(
@@ -38,17 +38,22 @@ export async function GET(request: Request) {
       auth: auth || undefined 
     });
     
-    // Set up time boundaries for the query (start and end of the selected day)
-    // Convert the requested date to admin timezone for calendar query
-    const timeMin = startOfDay(toZonedTime(date, ADMIN_TIMEZONE));
-    const timeMax = endOfDay(toZonedTime(date, ADMIN_TIMEZONE));
+    // Get the day in IST timezone - but be explicit about IST regardless of server timezone
+    const dateInIST = toZonedTime(date, ADMIN_TIMEZONE);
+    const year = dateInIST.getFullYear();
+    const month = String(dateInIST.getMonth() + 1).padStart(2, '0');
+    const day = String(dateInIST.getDate()).padStart(2, '0');
+    
+    // Query range: full day in IST - use explicit IST offset
+    const istDayStart = new Date(`${year}-${month}-${day}T00:00:00+05:30`);
+    const istDayEnd = new Date(`${year}-${month}-${day}T23:59:59+05:30`);
     
     try {
-      // Query Google Calendar for busy periods (in admin timezone)
+      // Query Google Calendar for busy periods
       const freeBusyResponse = await calendar.freebusy.query({
         requestBody: {
-          timeMin: timeMin.toISOString(),
-          timeMax: timeMax.toISOString(),
+          timeMin: istDayStart.toISOString(),
+          timeMax: istDayEnd.toISOString(),
           items: [{ id: 'primary' }]
         }
       });
@@ -56,11 +61,11 @@ export async function GET(request: Request) {
       // Get busy slots from the response
       const busySlots = freeBusyResponse.data.calendars?.primary?.busy || [];
       
-      // Generate all possible time slots for the day in ADMIN TIMEZONE
-      const allSlotsInAdminTz = generateTimeSlots(toZonedTime(date, ADMIN_TIMEZONE), duration);
+      // Generate 8PM-12AM IST slots for the given date (returned as UTC)
+      const allSlots = generateISTTimeSlots(year, month, day, duration);
       
-      // Filter out busy slots (still in admin timezone)
-      const availableSlotsInAdminTz = allSlotsInAdminTz.filter(slot => {
+      // Filter out busy slots
+      const availableSlots = allSlots.filter(slot => {
         const slotStart = new Date(slot.start);
         const slotEnd = new Date(slot.end);
         
@@ -69,62 +74,32 @@ export async function GET(request: Request) {
           const busyStart = parseISO(busySlot.start || '');
           const busyEnd = parseISO(busySlot.end || '');
           
-          // Check for overlap - a slot overlaps with a busy period if:
-          // 1. The slot starts during the busy period, OR
-          // 2. The slot ends during the busy period, OR
-          // 3. The slot completely contains the busy period
           return (
-            // Slot start is within busy period
-            (isAfter(slotStart, busyStart) && isBefore(slotStart, busyEnd)) ||
-            // Slot start is exactly at busy start
-            slotStart.getTime() === busyStart.getTime() ||
-            // Slot end is within busy period
-            (isAfter(slotEnd, busyStart) && isBefore(slotEnd, busyEnd)) ||
-            // Slot end is exactly at busy end
-            slotEnd.getTime() === busyEnd.getTime() ||
-            // Slot completely contains the busy period
-            (isBefore(slotStart, busyStart) && isAfter(slotEnd, busyEnd))
+            (slotStart.getTime() >= busyStart.getTime() && slotStart.getTime() < busyEnd.getTime()) ||
+            (slotEnd.getTime() > busyStart.getTime() && slotEnd.getTime() <= busyEnd.getTime()) ||
+            (slotStart.getTime() <= busyStart.getTime() && slotEnd.getTime() >= busyEnd.getTime())
           );
         });
         
-        // Only include non-overlapping slots
         return !isOverlapping;
       });
       
-      // Convert available slots to requested timezone for display
-      // BUT keep the original IST times for actual booking
-      const slotsForDisplay = availableSlotsInAdminTz.map(slot => {
-        const adminStartTime = new Date(slot.start);
-        const adminEndTime = new Date(slot.end);
+      // Convert slots to user's timezone for display
+      const slotsForDisplay = availableSlots.map(slot => {
+        const utcStart = new Date(slot.start);
+        const utcEnd = new Date(slot.end);
         
-        // Only convert times if requested timezone is different from admin timezone
-        if (timezone !== ADMIN_TIMEZONE) {
-          const displayStartTime = toZonedTime(adminStartTime, timezone);
-          const displayEndTime = toZonedTime(adminEndTime, timezone);
-          
-          return {
-            // Display times in requested timezone
-            start: displayStartTime.toISOString(),
-            end: displayEndTime.toISOString(),
-            // Original admin timezone times for booking - keep as ISO strings
-            adminStart: adminStartTime.toISOString(),
-            adminEnd: adminEndTime.toISOString(),
-            adminStartIST: adminStartTime.toLocaleString('en-US', { timeZone: process.env.ADMIN_TIMEZONE }),
-            adminEndIST: adminEndTime.toLocaleString('en-US', { timeZone: process.env.ADMIN_TIMEZONE }),
-            available: true,
-            displayTimezone: timezone,
-            adminTimezone: ADMIN_TIMEZONE
-          };
-        }
+        // Convert UTC times to user's timezone for display
+        // Don't use toZonedTime - it doesn't convert, it interprets
+        // Instead, use the UTC time and format it in the target timezone
         
-        // If admin timezone is requested, just use the original times
         return {
-          start: adminStartTime.toISOString(),
-          end: adminEndTime.toISOString(),
-          adminStart: adminStartTime.toISOString(),
-          adminEnd: adminEndTime.toISOString(),
+          start: utcStart.toISOString(), // Keep UTC time but frontend will display in user timezone
+          end: utcEnd.toISOString(),
+          adminStart: utcStart.toISOString(), // Keep UTC time for booking
+          adminEnd: utcEnd.toISOString(),
           available: true,
-          displayTimezone: ADMIN_TIMEZONE,
+          displayTimezone: timezone,
           adminTimezone: ADMIN_TIMEZONE
         };
       });
@@ -139,9 +114,6 @@ export async function GET(request: Request) {
       
     } catch (error) {
       console.error('Error querying Google Calendar:', error);
-      
-      // Fall back to fake data if there's an error (for development)
-        
       return NextResponse.json(
         { error: 'Failed to fetch available slots' }, 
         { status: 500 }
@@ -157,38 +129,33 @@ export async function GET(request: Request) {
   }
 }
 
-// Helper function to generate all possible time slots for a day
-function generateTimeSlots(date: Date, slotDuration: number) {
+// Generate time slots for 8PM-12AM IST on a specific date
+function generateISTTimeSlots(year: number, month: string, day: string, slotDuration: number) {
   const slots = [];
-  const now = new Date();
   
-  // Ensure we're working with IST timezone for the availability window
-  const istDate = toZonedTime(date, ADMIN_TIMEZONE);
-  const dayStart = startOfDay(istDate);
+  // Create IST times properly - don't rely on server timezone
+  // We need to create a Date that represents 8PM IST, regardless of server timezone
   
-  // Availability window: 8PM to 12AM IST
-  const windowStart = new Date(dayStart);
-  windowStart.setHours(20, 0, 0, 0); // Start at 8 PM IST
+  // Method: Create a date string with IST offset and parse it properly
+  const istDate = `${year}-${month}-${day}`;
   
-  const windowEnd = new Date(dayStart);
-  windowEnd.setHours(0, 0, 0, 0); // End at 12 AM (midnight) IST
-  windowEnd.setDate(windowEnd.getDate() + 1); // Move to next day
+  // Create 8PM IST by specifying the time and then converting from IST timezone
+  const istStart8PM = new Date(`${istDate}T20:00:00+05:30`); // 8PM IST explicitly
+  const istEnd12AM = new Date(`${istDate}T23:59:59+05:30`); // 11:59:59 PM IST explicitly
   
-  // Convert current time to IST for comparison
-  const nowInIST = toZonedTime(now, ADMIN_TIMEZONE);
+  // Calculate the end of availability window (12AM IST = 4 hours from 8PM)
+  const windowEnd = new Date(istStart8PM.getTime() + (4 * 60 * 60 * 1000)); // 4 hours later
   
-  // Use the provided duration as the increment
-  const slotIncrement = slotDuration; // minutes
+  const now = new Date(); // Current UTC time
+  let current = new Date(istStart8PM.getTime());
   
-  // Generate slots for the window (8PM to 12AM IST)
-  let current = new Date(windowStart);
-  while (current < windowEnd) {
-    // Only include future slots (compare in IST)
-    if (isAfter(current, nowInIST)) {
+  while (current.getTime() < windowEnd.getTime()) {
+    // Only include future slots
+    if (current.getTime() > now.getTime()) {
       const slotEnd = addMinutes(current, slotDuration);
       
-      // Only add slot if it ends before or at the end time
-      if (slotEnd <= windowEnd) {
+      // Only add if slot ends within the window
+      if (slotEnd.getTime() <= windowEnd.getTime()) {
         slots.push({
           start: current.toISOString(),
           end: slotEnd.toISOString(),
@@ -197,57 +164,7 @@ function generateTimeSlots(date: Date, slotDuration: number) {
       }
     }
     
-    // Move to next slot using the provided duration
-    current = addMinutes(current, slotIncrement);
-  }
-  
-  return slots;
-}
-
-// Fallback function for development/testing
-function generateFakeAvailableSlots(date: Date, duration: number) {
-  const slots = [];
-  const now = new Date();
-  
-  // Ensure we're working with IST timezone for the availability window
-  const istDate = toZonedTime(date, ADMIN_TIMEZONE);
-  const dayStart = startOfDay(istDate);
-  
-  // Availability window: 8PM to 12AM IST
-  const windowStart = new Date(dayStart);
-  windowStart.setHours(20, 0, 0, 0); // Start at 8 PM IST
-  
-  const windowEnd = new Date(dayStart);
-  windowEnd.setHours(0, 0, 0, 0); // End at 12 AM (midnight) IST
-  windowEnd.setDate(windowEnd.getDate() + 1); // Move to next day
-  
-  // Convert current time to IST for comparison
-  const nowInIST = toZonedTime(now, ADMIN_TIMEZONE);
-  
-  // Generate slots for the window (8PM to 12AM IST)
-  let current = new Date(windowStart);
-  while (current < windowEnd) {
-    // Only include future slots (compare in IST)
-    if (isAfter(current, nowInIST)) {
-      // Randomly mark some slots as unavailable (for demo purposes)
-      const available = Math.random() > 0.3;
-      
-      if (available) {
-        const slotEnd = addMinutes(current, duration);
-        
-        // Only add slot if it ends before or at the end time
-        if (slotEnd <= windowEnd) {
-          slots.push({
-            start: current.toISOString(),
-            end: slotEnd.toISOString(),
-            available: true
-          });
-        }
-      }
-    }
-    
-    // Add the selected duration to current time
-    current = addMinutes(current, duration);
+    current = addMinutes(current, slotDuration);
   }
   
   return slots;

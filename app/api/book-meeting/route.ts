@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if(duration!=15 && duration != 30 && duration != 60) {
+    if(duration !== 15 && duration !== 30 && duration !== 60) {
       return NextResponse.json(
         { error: 'Duration must be 15, 30 or 60 minutes' }, 
         { status: 400 }
@@ -56,29 +56,27 @@ export async function POST(request: Request) {
     const userAgent = request.headers.get('user-agent') || 'Unknown';
     const referer = request.headers.get('referer') || 'Unknown';
     
-    // Parse start time from user's timezone - this is already in admin timezone
-    // because we're using the adminStart value from the available slots API
-    const userStartTime = new Date(dateTime);
+    // The dateTime parameter comes from the frontend as adminStart time (IST)
+    // So we can use it directly for calendar booking
+    const adminStartTime = new Date(dateTime);
+    const adminEndTime = addMinutes(adminStartTime, duration);
     
-    // Calculate end time in user's timezone
-    const userEndTime = addMinutes(userStartTime, duration);
-    
-    // Store original timezone info for reference
-    const userTimezone = timezone;
+    // For user display purposes, convert to their timezone
+    const userStartTime = toZonedTime(adminStartTime, timezone);
+    const userEndTime = toZonedTime(adminEndTime, timezone);
     
     try {
-      // Create a Google Calendar event with Meet link
-      // When using adminStart from available slots, we're already in admin timezone
+      // Create a Google Calendar event with Meet link using IST times
       const createdEvent = await createGoogleCalendarEvent({
         summary: `Discussion: ${name} & ${process.env.OWNER_NAME}`,
         description: purpose 
-          ? `Purpose: ${purpose}\nBooked in timezone: ${userTimezone}` 
-          : `Scheduled meeting\nBooked in timezone: ${userTimezone}`,
-        startTime: userStartTime, 
-        endTime: userEndTime,
+          ? `Purpose: ${purpose}\nBooked in timezone: ${timezone}\nUser time: ${userStartTime.toLocaleString()}` 
+          : `Scheduled meeting\nBooked in timezone: ${timezone}\nUser time: ${userStartTime.toLocaleString()}`,
+        startTime: adminStartTime, // Use IST time for calendar
+        endTime: adminEndTime, // Use IST time for calendar
         attendees: [{ email }, { email: process.env.EMAIL_ADDRESS }],
         id: bookingId,
-        timezone: ADMIN_TIMEZONE // Always use admin timezone for Google Calendar
+        timezone: ADMIN_TIMEZONE // Always use IST for Google Calendar
       });
       
       const meetLink = createdEvent.hangoutLink || '';
@@ -94,13 +92,13 @@ export async function POST(request: Request) {
       const rescheduleLink = `${baseUrl}/meet/reschedule?id=${bookingId}&token=${rescheduleToken}`;
       const cancelLink = `${baseUrl}/meet/cancel?id=${bookingId}&token=${cancelToken}`;
       
-      // Store meeting in database - keep user's original time and timezone
+      // Store meeting in database
       const meeting: Meeting = {
         id: bookingId,
         name,
         email,
         purpose,
-        dateTime: userStartTime.toISOString(),
+        dateTime: userStartTime.toISOString(), // Store user's time for reference
         duration,
         eventId,
         meetLink,
@@ -108,14 +106,14 @@ export async function POST(request: Request) {
         cancelToken,
         status: 'confirmed',
         createdAt: new Date().toISOString(),
-        timezone: userTimezone, // Store user's timezone
-        adminDateTime: userStartTime.toISOString() // adminStart is already in admin timezone
+        timezone: timezone, // Store user's timezone
+        adminDateTime: adminStartTime.toISOString() // Store IST time for admin reference
       };
       
       // Create the meeting in the database
       await createMeeting(meeting);
       
-      // Add metadata separately to avoid cluttering the main meeting object
+      // Add metadata separately
       await addMeetingMetadata(bookingId, {
         ipAddress: IPaddress,
         userAgent,
@@ -128,17 +126,17 @@ export async function POST(request: Request) {
       await sendMeetingConfirmationEmail(email, {
         id: bookingId,
         name,
-        dateTime: userStartTime.toISOString(),
+        dateTime: userStartTime.toISOString(), // Use user's timezone for email
         duration,
         purpose,
         meetLink,
         calendarLink,
         rescheduleLink,
         cancelLink,
-        timezone: userTimezone // Include user's timezone
+        timezone: timezone
       });
       
-      // Return success response with meeting details
+      // Return success response
       return NextResponse.json({
         success: true,
         meetingId: bookingId,
@@ -146,13 +144,12 @@ export async function POST(request: Request) {
         calendarLink,
         rescheduleLink,
         cancelLink,
-        timezone: userTimezone,
-        dateTime: userStartTime.toISOString() // Return user time
+        timezone: timezone,
+        dateTime: userStartTime.toISOString() // Return user's timezone time
       });
       
     } catch (error) {
       console.error('Error creating Google Calendar event:', error);
-      
       throw new Error('Failed to create event in Google Calendar');
     }
     

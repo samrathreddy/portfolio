@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { addDays, format, setHours, setMinutes, isAfter, isBefore, startOfDay } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { ChevronLeft, ChevronRight, Clock, Calendar as CalendarIcon, User, Mail, MessageSquare, Check } from "lucide-react";
 import TimeZoneSelector from "@/app/components/TimeZoneSelector";
 
@@ -159,7 +160,9 @@ export default function MeetPage() {
   };
   
   const formatTimeSlot = (dateStr: string) => {
-    return format(new Date(dateStr), "h:mm a");
+    // Format UTC time in the user's selected timezone
+    if (!selectedTimezone) return format(new Date(dateStr), "h:mm a");
+    return formatInTimeZone(new Date(dateStr), selectedTimezone, "h:mm a");
   };
 
   return (
@@ -359,7 +362,7 @@ export default function MeetPage() {
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Time:</span>
-                  <span>{displayTime ? format(displayTime, "h:mm a") : ""}</span>
+                  <span>{displayTime && selectedTimezone ? formatInTimeZone(displayTime, selectedTimezone, "h:mm a") : ""}</span>
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Timezone:</span>
@@ -380,9 +383,9 @@ export default function MeetPage() {
                 <Check size={32} />
               </div>
               
-              <h2 className="text-2xl font-bold mb-2">Booking Confirmed!</h2>
+              <h2 className="text-2xl font-bold mb-2">Meeting Scheduled!</h2>
               <p className="text-gray-400 mb-6">
-                You're all set! I've sent a confirmation email to {formData.email} with all the details.
+                You're all set! Please check google calendar for the meeting details.
               </p>
               
               <div className="bg-gray-800 p-6 rounded-lg mb-6">
@@ -393,7 +396,7 @@ export default function MeetPage() {
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Time:</span>
-                  <span>{displayTime ? format(displayTime, "h:mm a") : ""}</span>
+                  <span>{displayTime && selectedTimezone ? formatInTimeZone(displayTime, selectedTimezone, "h:mm a") : ""}</span>
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Timezone:</span>

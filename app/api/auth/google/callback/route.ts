@@ -47,14 +47,22 @@ export async function GET(request: Request) {
       <html>
         <head>
           <title>OAuth Success</title>
+          <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+          <meta http-equiv="Pragma" content="no-cache">
+          <meta http-equiv="Expires" content="0">
           <style>
             body { font-family: system-ui; max-width: 800px; margin: 0 auto; padding: 20px; }
             pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
             .token-section { margin-bottom: 20px; }
             .debug { background: #ffe; padding: 10px; margin: 20px 0; border: 1px solid #ddd; }
+            .warning { background: #ffebee; border: 1px solid #f44336; padding: 15px; margin: 20px 0; border-radius: 4px; }
           </style>
         </head>
         <body>
+          <div class="warning">
+            <h3>⚠️ Security Warning</h3>
+            <p>This page contains sensitive authentication tokens. Do not share this URL or leave this page open in a public environment.</p>
+          </div>
           <h1>OAuth Authentication Successful!</h1>
           <p>Add these tokens to your environment variables:</p>
           
