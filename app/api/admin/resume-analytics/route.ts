@@ -87,10 +87,10 @@ export async function GET(request: NextRequest) {
     
     // Geographic distribution (filtered by period)
     const geoMatchCondition = period === 'all' 
-      ? { country: { $exists: true, $ne: null, $ne: "" } }
+      ? { country: { $exists: true, $nin: [null, ""] } }
       : { 
           ...(dateFilter as any),
-          country: { $exists: true, $ne: null, $ne: "" } 
+          country: { $exists: true, $nin: [null, ""] } 
         };
       
     const geographicData = await ResumeViewModel.aggregate([
@@ -121,10 +121,10 @@ export async function GET(request: NextRequest) {
     ]);
     
     const browserMatchCondition = period === 'all'
-      ? { browser: { $exists: true, $ne: null, $ne: "" } }
+      ? { browser: { $exists: true, $nin: [null, ""] } }
       : { 
           ...(dateFilter as any),
-          browser: { $exists: true, $ne: null, $ne: "" } 
+          browser: { $exists: true, $nin: [null, ""] } 
         };
       
     const browserStats = await ResumeViewModel.aggregate([
@@ -141,10 +141,10 @@ export async function GET(request: NextRequest) {
     ]);
     
     const osMatchCondition = period === 'all'
-      ? { os: { $exists: true, $ne: null, $ne: "" } }
+      ? { os: { $exists: true, $nin: [null, ""] } }
       : { 
           ...(dateFilter as any),
-          os: { $exists: true, $ne: null, $ne: "" } 
+          os: { $exists: true, $nin: [null, ""] } 
         };
       
     const osStats = await ResumeViewModel.aggregate([
@@ -174,10 +174,10 @@ export async function GET(request: NextRequest) {
     ]);
     
     const referrerMatchCondition = period === 'all'
-      ? { referrer: { $exists: true, $ne: null, $ne: "" } }
+      ? { referrer: { $exists: true, $nin: [null, ""] } }
       : { 
           ...(dateFilter as any),
-          referrer: { $exists: true, $ne: null, $ne: "" } 
+          referrer: { $exists: true, $nin: [null, ""] } 
         };
       
     // Top referrers (filtered by period)
@@ -201,10 +201,10 @@ export async function GET(request: NextRequest) {
       .lean();
     
     const orgMatchCondition = period === 'all'
-      ? { org: { $exists: true, $ne: null, $ne: "" } }
+      ? { org: { $exists: true, $nin: [null, ""] } }
       : { 
           ...(dateFilter as any),
-          org: { $exists: true, $ne: null, $ne: "" } 
+          org: { $exists: true, $nin: [null, ""] } 
         };
       
     // ISP/Organization data (filtered by period)
@@ -221,10 +221,10 @@ export async function GET(request: NextRequest) {
     ]);
     
     const conversionMatchCondition = period === 'all'
-      ? { country: { $exists: true, $ne: null, $ne: "" } }
+      ? { country: { $exists: true, $nin: [null, ""] } }
       : { 
           ...(dateFilter as any),
-          country: { $exists: true, $ne: null, $ne: "" } 
+          country: { $exists: true, $nin: [null, ""] } 
         };
       
     // Download conversion rate by country (filtered by period)
