@@ -204,9 +204,17 @@ export function NavHeader() {
 
               <div className="w-px h-6 bg-white/10 mx-2" />
 
-              <Link href="https://bit.ly/samrathresume" target="_blank">
+              <Link href="/resume">
                 <Button 
                   className="bg-primary hover:bg-primary/90 text-black transition-all relative group overflow-hidden"
+                  onClick={() => {
+                    fetch('/api/resume-click', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                    });
+                  }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-primary via-yellow-400 to-primary opacity-0 group-hover:opacity-100 animate-gradient-xy transition-opacity" />
                   <FileText className="w-4 h-4 mr-2 relative z-10" />
@@ -294,9 +302,17 @@ export function NavHeader() {
                       </div>
                     </Link>
                   </div>
-                  <Link href="https://bit.ly/samrathresume" target="_blank" className="block">
+                  <Link href="/resume" className="block">
                     <Button 
                       className="w-full bg-primary hover:bg-primary/90 text-black transition-all relative group overflow-hidden"
+                      onClick={() => {
+                        fetch('/api/resume-click', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                        });
+                      }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-primary via-yellow-400 to-primary opacity-0 group-hover:opacity-100 animate-gradient-xy transition-opacity" />
                       <FileText className="w-4 h-4 mr-2 relative z-10" />
