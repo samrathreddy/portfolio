@@ -96,12 +96,12 @@ export function HeroSection() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-fade-in delay-500 hidden sm:block">
+      {/* <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-fade-in delay-500 hidden sm:block">
         <div className="flex flex-col items-center gap-2">
           <span className="text-sm text-muted-foreground">Scroll to explore</span>
           <div className="w-[2px] h-8 bg-gradient-to-b from-primary to-transparent" />
         </div>
-      </div>
+      </div> */}
     </section>
   )
 } 
