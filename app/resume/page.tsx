@@ -213,7 +213,7 @@ export default function ResumePage() {
           )}
         </div>
         
-        <div className="mt-6 p-4 bg-zinc-800 rounded-lg border border-zinc-700">
+        {/* <div className="mt-6 p-4 bg-zinc-800 rounded-lg border border-zinc-700">
           <div className="flex items-center justify-between text-sm text-gray-400">
             <div className="flex items-center gap-4">
               <span>📍 Available for remote opportunities</span>
@@ -221,7 +221,7 @@ export default function ResumePage() {
             </div>
             <span>Session: {sessionId ? sessionId.slice(-8) : 'Loading...'}</span>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
