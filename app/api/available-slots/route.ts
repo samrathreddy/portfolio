@@ -3,11 +3,12 @@ import { addMinutes, format, parseISO } from 'date-fns';
 import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 import { getGoogleCalendarAuth } from '@/lib/google';
 import { google } from 'googleapis';
+import { withCorsMiddleware } from '@/lib/cors';
 
 // Admin timezone - all slots are calculated in this timezone first
 const ADMIN_TIMEZONE = 'Asia/Kolkata'; // IST
 
-export async function GET(request: Request) {
+async function availableSlotsHandler(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const dateParam = searchParams.get('date');
@@ -169,3 +170,5 @@ function generateISTTimeSlots(year: number, month: string, day: string, slotDura
   
   return slots;
 }
+
+export const GET = withCorsMiddleware(availableSlotsHandler);
