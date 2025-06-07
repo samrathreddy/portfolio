@@ -139,9 +139,17 @@ export default function MeetPage() {
       setError(null);
       
       try {
-        const response = await fetch(
-          `/api/available-slots?date=${selectedDate.toISOString()}&duration=${selectedDuration}&timezone=${selectedTimezone}`
-        );
+        const response = await fetch('/api/available-slots', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            date: selectedDate.toISOString(),
+            duration: selectedDuration,
+            timezone: selectedTimezone
+          })
+        });
         
         if (!response.ok) {
           throw new Error('Failed to fetch available slots');

@@ -51,8 +51,6 @@ function getAllowedOrigins(): string[] {
       allowedOrigins.push(appUrl);
     }
   }
-
-  console.log('Configured CORS allowed origins:', allowedOrigins);
   return allowedOrigins;
 }
 

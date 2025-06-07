@@ -10,10 +10,9 @@ const ADMIN_TIMEZONE = 'Asia/Kolkata'; // IST
 
 async function availableSlotsHandler(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const dateParam = searchParams.get('date');
-    const durationParam = searchParams.get('duration');
-    const timezone = searchParams.get('timezone') || ADMIN_TIMEZONE;
+    // Parse request body instead of URL search params
+    const body = await request.json();
+    const { date: dateParam, duration: durationParam, timezone = ADMIN_TIMEZONE } = body;
     
     if (!dateParam) {
       return NextResponse.json(
@@ -171,4 +170,4 @@ function generateISTTimeSlots(year: number, month: string, day: string, slotDura
   return slots;
 }
 
-export const GET = withCorsMiddleware(availableSlotsHandler);
+export const POST = withCorsMiddleware(availableSlotsHandler);
