@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import ResumeViewModel from '@/lib/models/ResumeView';
 import { parseUserAgent, getGeolocationData, generateSessionId } from '@/lib/analytics-utils';
+import { withCorsMiddleware } from '@/lib/cors';
 
-export async function POST(request: NextRequest) {
+async function resumeDownloadHandler(request: NextRequest) {
   try {
     // Connect to the database
     await connectToDatabase();
@@ -145,3 +146,5 @@ export async function POST(request: NextRequest) {
     }, { status: 500 });
   }
 } 
+
+export const POST = withCorsMiddleware(resumeDownloadHandler);

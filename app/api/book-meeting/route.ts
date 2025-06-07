@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { addMinutes } from 'date-fns';
 import { getGoogleCalendarAuth, createGoogleCalendarEvent } from '@/lib/google';
 import { createMeeting, addMeetingMetadata } from '@/lib/db';
@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import type { Meeting } from '@/lib/db';
 import { toZonedTime } from 'date-fns-tz';
+import { withCorsMiddleware } from '@/lib/cors';
 
 // Admin timezone - to be consistent with available-slots API
 const ADMIN_TIMEZONE = 'Asia/Kolkata'; // IST
@@ -26,7 +27,7 @@ function generateSecureToken() {
 // the adminStart time from the available slots API, so we don't need to convert
 // it to admin timezone. It's already in admin timezone (IST).
 
-export async function POST(request: Request) {
+async function bookMeetingHandler(request: NextRequest) {
   try {
     const body = await request.json();
     const { name, email, purpose, dateTime, duration, timezone = ADMIN_TIMEZONE } = body;
@@ -160,4 +161,7 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-} 
+}
+
+// Export the handler with CORS middleware
+export const POST = withCorsMiddleware(bookMeetingHandler); 

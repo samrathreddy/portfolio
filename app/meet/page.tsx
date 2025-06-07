@@ -44,6 +44,91 @@ export default function MeetPage() {
   const [bookingComplete, setBookingComplete] = useState(false);
   const [meetLink, setMeetLink] = useState("");
   const [error, setError] = useState<string | null>(null);
+  
+  // Analytics tracking state
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [pageStartTime, setPageStartTime] = useState<number>(Date.now());
+
+  // Analytics tracking functions
+  const trackPageView = async () => {
+    try {
+      const response = await fetch('/api/meet-tracking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'page_view',
+          sessionId: sessionId,
+          duration: Math.floor((Date.now() - pageStartTime) / 1000)
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.sessionId && !sessionId) {
+          setSessionId(data.sessionId);
+        }
+      }
+    } catch (error) {
+      console.error('Error tracking page view:', error);
+    }
+  };
+
+  const trackStepCompletion = async (stepNumber: number, additionalData?: any) => {
+    try {
+      await fetch('/api/meet-tracking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'step_completion',
+          sessionId: sessionId,
+          step: stepNumber,
+          meetingScheduled: stepNumber === 3 && bookingComplete,
+          selectedDuration: stepNumber === 1 ? selectedDuration : undefined,
+          selectedTimezone: stepNumber === 1 ? selectedTimezone : undefined,
+          ...additionalData
+        })
+      });
+    } catch (error) {
+      console.error('Error tracking step completion:', error);
+    }
+  };
+
+  const trackInteraction = async (interactionType: string, additionalData?: any) => {
+    try {
+      await fetch('/api/meet-tracking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'interaction',
+          sessionId: sessionId,
+          interactionType,
+          selectedDuration: interactionType === 'duration_change' ? selectedDuration : undefined,
+          selectedTimezone: interactionType === 'timezone_change' ? selectedTimezone : undefined,
+          ...additionalData
+        })
+      });
+    } catch (error) {
+      console.error('Error tracking interaction:', error);
+    }
+  };
+
+  // Track initial page view
+  useEffect(() => {
+    trackPageView();
+    
+    // Track page view duration when user leaves
+    const handleBeforeUnload = () => {
+      const duration = Math.floor((Date.now() - pageStartTime) / 1000);
+      navigator.sendBeacon('/api/meet-tracking', JSON.stringify({
+        action: 'page_view',
+        sessionId: sessionId,
+        duration
+      }));
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
 
   // Load time slots when date, duration, or timezone changes
   useEffect(() => {
@@ -86,10 +171,16 @@ export default function MeetPage() {
     setSelectedDate(date);
     setSelectedTime(null); // Reset selected time when date changes
     setDisplayTime(null); // Reset display time as well
+    
+    // Track date change interaction
+    trackInteraction('date_change');
   };
 
   const handleDurationSelect = (duration: number) => {
     setSelectedDuration(duration);
+    
+    // Track duration change interaction
+    trackInteraction('duration_change');
   };
 
   const handleTimeSelect = (slot: TimeSlot) => {
@@ -97,12 +188,18 @@ export default function MeetPage() {
     // but store the display time (user's timezone) for showing in the UI
     setSelectedTime(new Date(slot.adminStart || slot.start));
     setDisplayTime(new Date(slot.start)); // Set display time in user's timezone
+    
+    // Track time slot click
+    trackInteraction('time_slot_click');
   };
 
   const handleTimezoneChange = (timezone: string) => {
     setSelectedTimezone(timezone);
     setSelectedTime(null); // Reset selected time when timezone changes
     setDisplayTime(null); // Reset display time as well
+    
+    // Track timezone change interaction
+    trackInteraction('timezone_change');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -113,7 +210,11 @@ export default function MeetPage() {
   const handleContinue = () => {
     if (step === 1 && selectedTime) {
       setStep(2);
+      // Track step 1 completion
+      trackStepCompletion(1);
     } else if (step === 2 && formData.name && formData.email) {
+      // Track step 2 completion before submitting
+      trackStepCompletion(2);
       handleSubmit();
     }
   };
@@ -151,6 +252,9 @@ export default function MeetPage() {
       setMeetLink(data.meetLink);
       setBookingComplete(true);
       setStep(3);
+      
+      // Track step 3 completion (meeting scheduled)
+      trackStepCompletion(3, { meetingScheduled: true });
     } catch (error) {
       console.error("Error booking meeting:", error);
       setError(error instanceof Error ? error.message : 'Failed to book meeting');
