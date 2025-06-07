@@ -18,6 +18,11 @@ interface MeetView {
   step3Reached?: boolean;
   selectedDuration?: number;
   selectedTimezone?: string;
+  // Device and browser information
+  deviceType?: 'mobile' | 'tablet' | 'desktop';
+  device?: string;
+  browser?: string;
+  browserVersion?: string;
   __v: number;
 }
 
