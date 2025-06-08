@@ -27,6 +27,9 @@ export const metadata: Metadata = {
     "JavaScript",
     "Personal Website"
   ],
+  authors: [{ name: "Samrath Reddy" }],
+  creator: "Samrath Reddy",
+  publisher: "Samrath Reddy",
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -43,16 +46,16 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest',
   openGraph: {
-    title: "Samrath Reddy | Full Stack Developer Portfolio & Projects",
+    title: "Samrath Reddy | Full Stack Developer & AI Engineer",
     description: "Discover Samrath Reddy's personal portfolio: Full Stack Developer skilled in React, Node.js, TypeScript, and modern web technologies. Explore projects, skills, tech stack, and professional experience.",
-    url: "https://samrathdev.vercel.app/", // Update to your actual domain
+    url: "https://samrath.bio/",
     siteName: "Samrath Reddy Portfolio",
     images: [
       {
-        url: "/logos/meta.png", // Update to your actual OG image
-        width: 1200,
-        height: 630,
-        alt: "Samrath Reddy Portfolio Screenshot"
+        url: "https://samrath.bio/image.png",
+        width: 512,
+        height: 512,
+        alt: "Samrath Reddy Portfolio"
       }
     ],
     locale: "en_IN",
@@ -62,11 +65,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Samrath Reddy | Full Stack Developer Portfolio & Projects",
     description: "Discover Samrath Reddy's personal portfolio: Full Stack Developer skilled in React, Node.js, TypeScript, and modern web technologies. Explore projects, skills, tech stack, and professional experience.",
-    site: "@samrathghana", // Update to your Twitter handle
-    creator: "@samrathghana", // Update to your Twitter handle
-    images: [
-      "https://pbs.twimg.com/profile_images/1663268610738094080/PQmizgM-_400x400.jpg" // Update to your actual OG image
-    ]
+    site: "@samrathghana",
+    creator: "@samrathghana",
+    images: ["https://samrath.bio/image.png"]
   },
   alternates: {
     canonical: "https://samrathdev.vercel.app/" // Update to your actual domain

@@ -133,7 +133,7 @@ export function ContactSection() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7 }}
-              className="order-2 lg:order-1"
+              className="order-1 lg:order-1"
             >
               <div className="bg-black/20 backdrop-blur-sm rounded-3xl border border-white/10 p-8 hover:border-primary/30 transition-all duration-500">
                 <div className="mb-8">
@@ -200,7 +200,7 @@ export function ContactSection() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7 }}
-              className="order-1 lg:order-2"
+              className="order-2 lg:order-2"
             >
               <div className="bg-black/20 backdrop-blur-sm rounded-3xl border border-white/10 p-8 hover:border-primary/30 transition-all duration-500 h-full">
                 <div className="mb-8">

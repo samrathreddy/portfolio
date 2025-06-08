@@ -138,7 +138,7 @@ export default function ResumePage() {
               View my latest resume below or download a copy
             </p>
             <p className="text-sm text-gray-500">
-              Last updated: {new Date().toLocaleDateString()}
+              Last updated: 08 March 2025
             </p>
           </div>
           
