@@ -6,14 +6,27 @@ export interface Project {
   preview: string;
   tech: string[];
   links: {
-    website: string;
-    github: string;
-    video: string;
+    website?: string;
+    github?: string;
+    video?: string;
   };
   color: string;
 }
 
 export const projects: Project[] = [
+  {
+    id: "leet-ai",
+    subtitle: "Leetcode AI Agent",
+    title: "Leet AI",
+    description: "Leet AI is a extension that allows users to solve leetcode problems without providing any code, just by describing the problem in natural language. Along with github integration to commit the code to the user's github repository.",
+    preview: "https://d2o32q70b7w560.cloudfront.net/leetai.mp4",
+    tech: ["React", "API Integrations", "OpenAI", "MongoDB", "Github", "Local Storage", "Extensions"],
+    links: {
+      github: "https://github.com/samrathreddy/leetAI",
+      video: "https://www.linkedin.com/feed/update/urn:li:activity:7311041179695886336/"
+    },
+    color: "from-[#10B981] to-[#059669]"
+  },
   {
     id: "day-code",
     subtitle: "Code Activity Tracker",
@@ -29,22 +42,21 @@ export const projects: Project[] = [
     color: "from-[#10B981] to-[#059669]"
   },
   {
-    id: "leet-ai",
-    subtitle: "Leetcode AI Agent",
-    title: "Leet AI (Unpublished)",
-    description: "Leet AI is a extension that allows users to solve leetcode problems without providing any code, just by describing the problem in natural language. Along with github integration to commit the code to the user's github repository.",
-    preview: "/portfolio/project/leetai.mp4",
-    tech: ["React", "API Integrations", "OpenAI", "MongoDB", "Github", "Local Storage", "Extensions"],
+    id: "honey-barrel",
+    subtitle: "Price Comparison extension",
+    title: "Honey Barrel",
+    description: "A Chrome extension that revolutionizes how wine and spirits enthusiasts discover the best prices by seamlessly integrating with the BAXUS marketplace. This extension automatically identifies bottles on retail websites and finds matching listings on BAXUS, along with real-time currency conversion for international comparison, potentially saving users significant money on their purchases.",
+    preview: "https://d2o32q70b7w560.cloudfront.net/honeybarrel.mp4",
+    tech: ["JavaScript", "Price Converter API", "API Integrations",  "Local Storage", "Extension"],
     links: {
-      website: "https://www.linkedin.com/feed/update/urn:li:activity:7311041179695886336/",
-      github: "https://github.com/samrathreddy",
-      video: "https://www.linkedin.com/feed/update/urn:li:activity:7311041179695886336/"
+      github: "https://github.com/samrathreddy/The-Honey-Barrel",
+      video: "https://www.youtube.com/watch?v=Q47_XGDMp3E"
     },
-    color: "from-[#10B981] to-[#059669]"
+    color: "from-[#FFD700] to-[#FFC000]"
   },
   {
     id: "cybernauts-cvr",
-    subtitle: "Cybernauts CVR Showcase website",
+    subtitle: "Community website",
     title: "Cybernauts CVR",
     description: "Made a website for a college club to showcase the club events and team members.",
     preview: "https://cybernautscvr.vercel.app/",
