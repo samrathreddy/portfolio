@@ -4,6 +4,7 @@ export interface Project {
   title: string;
   description: string;
   preview: string;
+  video?: string;
   tech: string[];
   links: {
     website?: string;
@@ -20,6 +21,7 @@ export const projects: Project[] = [
     title: "Leet AI",
     description: "Leet AI is a extension that allows users to solve leetcode problems without providing any code, just by describing the problem in natural language. Along with github integration to commit the code to the user's github repository.",
     preview: "https://d2o32q70b7w560.cloudfront.net/leetai.mp4",
+    video: "https://d2o32q70b7w560.cloudfront.net/leetai.mp4",
     tech: ["React", "API Integrations", "OpenAI", "MongoDB", "Github", "Local Storage", "Extensions"],
     links: {
       github: "https://github.com/samrathreddy/leetAI",
@@ -33,6 +35,7 @@ export const projects: Project[] = [
     title: "Day Code",
     description: "Day Code is a web application that allows users to track their daily code activity with leetcode and github api integration, even know and set reminders about the codeforces, codechef, leetcode contests along with google calendar integration, also know about the upcoming hackathons.",
     preview: "https://daycode.vercel.app/",
+    video: "https://d2o32q70b7w560.cloudfront.net/daycode.mov",
     tech: ["React", "API Integrations", "GraphQL", "Typescript", "Tailwind CSS", "Local Storage", "Vercel"],
     links: {
       website: "https://daycode.vercel.app/",
@@ -47,6 +50,7 @@ export const projects: Project[] = [
     title: "Honey Barrel",
     description: "A Chrome extension that revolutionizes how wine and spirits enthusiasts discover the best prices by seamlessly integrating with the BAXUS marketplace. This extension automatically identifies bottles on retail websites and finds matching listings on BAXUS, along with real-time currency conversion for international comparison, potentially saving users significant money on their purchases.",
     preview: "https://d2o32q70b7w560.cloudfront.net/honeybarrel.mp4",
+    video: "https://d2o32q70b7w560.cloudfront.net/honeybarrel.mp4",
     tech: ["JavaScript", "Price Converter API", "API Integrations",  "Local Storage", "Extension"],
     links: {
       github: "https://github.com/samrathreddy/The-Honey-Barrel",
@@ -60,6 +64,7 @@ export const projects: Project[] = [
     title: "Cybernauts CVR",
     description: "Made a website for a college club to showcase the club events and team members.",
     preview: "https://cybernautscvr.vercel.app/",
+    video: "https://d2o32q70b7w560.cloudfront.net/cybernauts.mp4",
     tech: ["React", "Typescript", "Tailwind CSS"],
     links: {
       website: "https://cybernautscvr.vercel.app/",
@@ -74,6 +79,7 @@ export const projects: Project[] = [
     title: "Email Domain Checker",
     description: "The Email Domain Checker is a web application that allows users to validate and categorize email addresses by public email, bussiness email, temporary email, disposable email using a powerful validation service along with OpenAI integration for Email Provider Detection. The application features a user-friendly interface built with React and Tailwind CSS, and it includes a backend powered by Node.js and Express. Even python module is also build for python specifc email provider detection.",
     preview: "https://email-domain-checker.vercel.app/",
+    video: "https://d2o32q70b7w560.cloudfront.net/emaildomain.mp4",
     tech: ["Typescript", "Tailwind CSS", "Python", "React", "Node.js", "Express.js", "OpenAI", "Vercel"],
     links: {
       website: "https://email-domain-checker.vercel.app/",
@@ -86,6 +92,7 @@ export const projects: Project[] = [
     id: "Xoerox",
     subtitle: "An AI based OCR tool",
     title: "Xoerox AI",
+    video: "https://d2o32q70b7w560.cloudfront.net/xoerox.mov",
     description: "XOEROX AI is a document processing application that helps in conversion of unstructured data to structure data using Optical Character Recognition (OCR) as well as Open AI for enhanced text extraction and formatting. It allows users to upload PDF files, process them to extract text, and convert the text into structured Markdown as well as in JSON.",
     preview: "https://xoerox.vercel.app/",
     tech: ["Express.js", "React", "Node.js", "TypeScript", "Optimal Character Recognition (OCR)", "OpenAI", "Vercel"],

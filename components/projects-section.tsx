@@ -344,7 +344,7 @@ export function ProjectsSection({
                                 <video
                                   id={`preview-${project.id}`}
                                   src={project.preview}
-                                  className="absolute top-0 left-0 w-full h-full object-cover transition-all duration-500 group-hover:filter-none filter blur-[2px]"
+                                  className="absolute top-0 left-0 w-full h-full object-cover"
                                   autoPlay
                                   muted
                                   loop
@@ -371,8 +371,10 @@ export function ProjectsSection({
                           )}
                         </div>
 
-                        {/* Hover Overlay - Removed the blur effect */}
-                        <div className="absolute inset-0 bg-black/40 opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none" />
+                        {/* Hover Overlay - Only show for iframes, not videos */}
+                        {!(project.preview.match(/\.(mp4|mov|webm)$/) || project.preview.includes('/projects/')) && (
+                          <div className="absolute inset-0 bg-black/40 opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none" />
+                        )}
                       </motion.div>
                     </div>
                   </div>
@@ -384,34 +386,12 @@ export function ProjectsSection({
               {orderedProjects.map((project, index) => (
                 <div key={project.id} className="relative">
                   <div className="relative group">
-                    {/* Curved Path */}
-                    <div className="absolute left-0 right-0 top-0 bottom-0 hidden lg:block pointer-events-none">
-                      <svg
-                        className="absolute inset-0 w-full h-full"
-                        preserveAspectRatio="none"
-                        viewBox="0 0 100 100"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d={index % 2 === 0 
-                            ? "M50,0 Q65,50 50,100" 
-                            : "M50,0 Q35,50 50,100"
-                          }
-                          className={`stroke-2 opacity-50 path-gradient-${index}`}
-                          strokeWidth="0.5"
-                          vectorEffect="non-scaling-stroke"
-                        />
-                      </svg>
-                    </div>
-
-                    <div className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center`}>  
+                    <div className="grid grid-cols-1 gap-12 items-center">  
                       <motion.div
                         initial={{ opacity: 0, y: 50 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.7, ease: "easeOut" }}
-                        className={`${index % 2 === 1 ? "lg:order-2" : ""}`}
                       >
                         <div className="group bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 p-8 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20">
                           <div
@@ -419,9 +399,31 @@ export function ProjectsSection({
                           >
                             {project.subtitle}
                           </div>
-                          <h3 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50 transform transition-transform duration-500 group-hover:translate-x-2">
+                          <h3 className="text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50 transform transition-transform duration-500 group-hover:translate-x-2">
                             {project.title}
                           </h3>
+
+                          {/* Mobile Video Preview - Only show if video exists and on mobile */}
+                          {project.video && isMobile && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              whileInView={{ opacity: 1, scale: 1 }}
+                              viewport={{ once: true }}
+                              transition={{ delay: 0.2, duration: 0.6 }}
+                              className="relative aspect-video rounded-xl overflow-hidden border border-white/20 mb-6"
+                            >
+                              <video
+                                src={project.video}
+                                className="w-full h-full object-cover"
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                                controls={false}
+                              />
+                            </motion.div>
+                          )}
+
                           <p className="text-gray-400 text-lg mb-6 transition-colors duration-500 group-hover:text-gray-300">
                             {project.description}
                           </p>
