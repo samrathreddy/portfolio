@@ -201,6 +201,48 @@ export function NavHeader() {
             isMobile ? "h-14 px-4" : isTablet ? "h-16 px-5" : "h-16 px-6"
           )}>
             {/* Logo/Brand */}
+            <div
+              className="text-white hover:text-white/80 transition-colors flex items-center gap-2 shrink-0 relative"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => {
+                setIsHovered(false)
+                setLetterHovered(-1)
+              }}
+            >
+              <div className="relative">
+                <div className="flex items-center">
+                  {portfolioText.split('').map((letter, index) => (
+                    <span
+                      key={index}
+                      className={cn(
+                        "font-semibold transition-all duration-300 hover:scale-125 cursor-default",
+                        isMobile ? "text-lg" : isTablet ? "text-xl" : "text-xl",
+                        letterHovered === index ? "text-primary animate-bounce" : "",
+                        isHovered ? "hover:text-primary" : "",
+                        isHovered && letterHovered === -1 ? "animate-pulse" : ""
+                      )}
+                      style={{
+                        opacity: isMobile ? 1 : Math.max(0, 1 - scrollProgress * 2),
+                        textShadow: letterHovered === index ? "0 0 20px rgba(255, 255, 0, 0.5)" : "none",
+                        transform: `translateY(${letterHovered === index ? "-2px" : "0"})`,
+                      }}
+                      onMouseEnter={() => setLetterHovered(index)}
+                      onMouseLeave={() => setLetterHovered(-1)}
+                    >
+                      {letter}
+                    </span>
+                  ))}
+                </div>
+                {isHovered && !isMobile && (
+                  <div 
+                    className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse"
+                    style={{
+                      opacity: Math.max(0, 1 - scrollProgress * 2)
+                    }}
+                  />
+                )}
+              </div>
+            </div>
 
             {/* Desktop/Large Tablet Navigation Links */}
             {isDesktop && (
