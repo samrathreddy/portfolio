@@ -340,7 +340,21 @@ export function ProjectsSection({
                           )}
                           {isClient && (
                             <div className="relative w-full h-full overflow-hidden bg-white">
-                              {project.preview.match(/\.(mp4|mov|webm)$/) || project.preview.includes('/projects/') ? (
+                              {/* Use video if available, otherwise use preview (website) */}
+                              {project.video ? (
+                                <video
+                                  id={`preview-${project.id}`}
+                                  src={project.video}
+                                  className="absolute top-0 left-0 w-full h-full object-cover"
+                                  autoPlay
+                                  muted
+                                  loop
+                                  playsInline
+                                  onLoadedData={() => {
+                                    setLoadedIframes(prev => ({ ...prev, [project.id]: true }))
+                                  }}
+                                />
+                              ) : project.preview.match(/\.(mp4|mov|webm)$/) || project.preview.includes('/projects/') ? (
                                 <video
                                   id={`preview-${project.id}`}
                                   src={project.preview}
@@ -372,7 +386,7 @@ export function ProjectsSection({
                         </div>
 
                         {/* Hover Overlay - Only show for iframes, not videos */}
-                        {!(project.preview.match(/\.(mp4|mov|webm)$/) || project.preview.includes('/projects/')) && (
+                        {!project.video && !(project.preview.match(/\.(mp4|mov|webm)$/) || project.preview.includes('/projects/')) && (
                           <div className="absolute inset-0 bg-black/40 opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none" />
                         )}
                       </motion.div>

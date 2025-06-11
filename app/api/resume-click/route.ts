@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateSessionId, parseUserAgent, getGeolocationData } from '@/lib/analytics-utils';
 import { connectToDatabase } from '@/lib/db';
 import { withCorsMiddleware } from '@/lib/cors';
+import ResumeViewModel from '@/lib/models/ResumeView';
 
 async function resumeClickHandler(request: NextRequest) {
   try {
@@ -14,7 +15,7 @@ async function resumeClickHandler(request: NextRequest) {
     
     // Get user agent and referrer
     const userAgent = request.headers.get('user-agent') || 'unknown';
-    const referrer = request.headers.get('referer') || undefined;
+    const referrer = request.headers.get('referer') || null;
     
     // Generate session ID
     const sessionId = generateSessionId();
@@ -33,21 +34,55 @@ async function resumeClickHandler(request: NextRequest) {
       // Get geolocation data
       const geoData = await getGeolocationData(ip);
       
-      // For now, just return success with session tracking
-      // You can implement actual database saving here if needed
-      console.log('Resume view tracked:', {
+      // Create the resume view record
+      const resumeViewData = {
+        ip,
+        userAgent,
+        referrer,
+        createdAt: new Date(),
+        downloaded: false, // Initially not downloaded
+        sessionId,
+        
+        // Enhanced user agent data
+        browser: deviceInfo.browser,
+        browserVersion: deviceInfo.browserVersion,
+        os: deviceInfo.os,
+        osVersion: deviceInfo.osVersion,
+        device: deviceInfo.device,
+        deviceType: deviceInfo.deviceType,
+        
+        // Geolocation data (if available)
+        ...(geoData && {
+          country: geoData.country,
+          city: geoData.city,
+          region: geoData.region,
+          timezone: geoData.timezone,
+          latitude: geoData.latitude,
+          longitude: geoData.longitude,
+          org: geoData.org,
+          postal: geoData.postal,
+          countryCode: geoData.countryCode
+        })
+      };
+      
+      // Save to database
+      const savedView = await ResumeViewModel.create(resumeViewData);
+      
+      console.log('Resume view tracked and saved:', {
+        id: savedView._id,
         sessionId,
         ip,
         userAgent: userAgent.substring(0, 50) + '...',
         referrer,
         pageLoadTime,
         ...deviceInfo,
-        ...geoData
+        ...(geoData && { location: `${geoData.city || 'Unknown'}, ${geoData.country || 'Unknown'}` })
       });
       
       return NextResponse.json({ 
         success: true, 
         sessionId,
+        recordId: savedView._id,
         message: 'Resume view tracked successfully'
       });
     } catch (dbError) {
@@ -55,7 +90,8 @@ async function resumeClickHandler(request: NextRequest) {
       return NextResponse.json({ 
         success: false,
         sessionId,
-        message: 'Failed to track resume view'
+        message: 'Failed to track resume view',
+        error: dbError instanceof Error ? dbError.message : 'Database error'
       }, { status: 500 });
     }
   } catch (error) {
