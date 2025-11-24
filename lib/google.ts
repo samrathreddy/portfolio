@@ -19,38 +19,22 @@ type GoogleAuthResult =
  */
 export async function getGoogleCalendarAuth(): Promise<GoogleAuthResult> {
   try {
-    // Create OAuth2 client using environment variables
-    if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-      const oauth2Client = new google.auth.OAuth2(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback'
-      );
-      
-      // If access token and refresh token are available in environment variables
-      if (process.env.GOOGLE_ACCESS_TOKEN && process.env.GOOGLE_REFRESH_TOKEN) {
-        // Set credentials on the client
-        oauth2Client.setCredentials({
-          access_token: process.env.GOOGLE_ACCESS_TOKEN,
-          refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-          expiry_date: process.env.GOOGLE_TOKEN_EXPIRY ? parseInt(process.env.GOOGLE_TOKEN_EXPIRY) : undefined
-        });
-        
-        // Token refresh logic happens automatically if token is expired
-        
-        return oauth2Client;
-      } else {
-        console.warn('OAuth tokens not found. Complete OAuth flow at /api/auth/google first.');
-      }
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_REFRESH_TOKEN) {
+      throw new Error('Missing Google OAuth credentials');
     }
+
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback'
+    );
     
-    // For development without credentials, return null that will be handled by the fallback logic in API routes
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('No Google Calendar credentials found, using fallback mock implementation');
-      return null;
-    }
+    // Only set refresh token - access token will be auto-generated
+    oauth2Client.setCredentials({
+      refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+    });
     
-    throw new Error('Google Calendar OAuth credentials not properly configured');
+    return oauth2Client;
     
   } catch (error) {
     console.error('Error setting up Google Calendar auth:', error);
