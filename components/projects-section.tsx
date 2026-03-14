@@ -3,7 +3,7 @@
 import { motion, Reorder, useMotionValue } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Project, projects as defaultProjects } from "../config/projects"
 import { useMediaQuery } from 'react-responsive';
 
@@ -52,6 +52,34 @@ export function ProjectsSection({
   }, [])
 
   const isMobile = useMediaQuery({ maxWidth: 767 }); // Adjust the maxWidth as needed
+  const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
+
+  // Lazy load videos with IntersectionObserver - only play when visible
+  useEffect(() => {
+    if (!isClient) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target as HTMLVideoElement;
+          if (entry.isIntersecting) {
+            if (video.preload === 'none') {
+              video.preload = 'auto';
+              video.load();
+            }
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { threshold: 0.25 }
+    );
+
+    videoRefs.current.forEach((video) => observer.observe(video));
+
+    return () => observer.disconnect();
+  }, [isClient, orderedProjects]);
 
   // Handle project reordering
   const handleReorder = (newOrder: Project[]) => {
@@ -344,9 +372,10 @@ export function ProjectsSection({
                               {project.video ? (
                                 <video
                                   id={`preview-${project.id}`}
+                                  ref={(el) => { if (el) videoRefs.current.set(`desktop-${project.id}`, el); }}
                                   src={project.video}
                                   className="absolute top-0 left-0 w-full h-full object-cover"
-                                  autoPlay
+                                  preload="none"
                                   muted
                                   loop
                                   playsInline
@@ -357,9 +386,10 @@ export function ProjectsSection({
                               ) : project.preview.match(/\.(mp4|mov|webm)$/) || project.preview.includes('/projects/') ? (
                                 <video
                                   id={`preview-${project.id}`}
+                                  ref={(el) => { if (el) videoRefs.current.set(`desktop-${project.id}`, el); }}
                                   src={project.preview}
                                   className="absolute top-0 left-0 w-full h-full object-cover"
-                                  autoPlay
+                                  preload="none"
                                   muted
                                   loop
                                   playsInline
@@ -427,9 +457,10 @@ export function ProjectsSection({
                               className="relative aspect-video rounded-xl overflow-hidden border border-white/20 mb-6"
                             >
                               <video
+                                ref={(el) => { if (el) videoRefs.current.set(`mobile-${project.id}`, el); }}
                                 src={project.video}
                                 className="w-full h-full object-cover"
-                                autoPlay
+                                preload="none"
                                 muted
                                 loop
                                 playsInline
