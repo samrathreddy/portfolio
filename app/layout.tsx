@@ -4,6 +4,7 @@ import { ReactQueryProvider } from "@/lib/react-query/provider"
 import { Analytics } from "@vercel/analytics/react"
 import type { Metadata } from "next"
 import { Toaster } from "sonner"
+import { PostHogProvider } from "./providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -82,9 +83,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ReactQueryProvider>
-          {children}
-        </ReactQueryProvider>
+        <PostHogProvider>
+          <ReactQueryProvider>
+            {children}
+          </ReactQueryProvider>
+        </PostHogProvider>
         <Analytics />
         <Toaster 
           position="bottom-right"
