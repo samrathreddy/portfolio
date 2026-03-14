@@ -14,8 +14,8 @@ const techStack = [
     category: "Languages"
   },
   {
-    name: "SQL",
-    icon: "/portfolio/tech/sql.svg",
+    name: "Supabase",
+    icon: "/portfolio/tech/supabase.svg",
     category: "Databases"
   },
   {
@@ -62,6 +62,26 @@ const techStack = [
     name: "OpenAI",
     icon: "/portfolio/tech/openai.svg",
     category: "AI"
+  },
+  {
+    name: "TypeScript",
+    icon: "/portfolio/tech/typescript.svg",
+    category: "Languages"
+  },
+  {
+    name: "FastAPI",
+    icon: "/portfolio/tech/fastapi.svg",
+    category: "Backend"
+  },
+  {
+    name: "Redis",
+    icon: "/portfolio/tech/redis.svg",
+    category: "Databases"
+  },
+  {
+    name: "Git",
+    icon: "/portfolio/tech/git.svg",
+    category: "Tools"
   }
 ]
 
