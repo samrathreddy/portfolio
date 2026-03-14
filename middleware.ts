@@ -12,7 +12,13 @@ export function middleware(request: NextRequest) {
       return new NextResponse(null, { status: 200, headers: corsHeaders });
     }
     
-    // Validate origin for all other requests
+    // Allow no-origin requests (direct browser navigation, e.g. OAuth redirects)
+    // These are safe because they can't be CSRF — browsers always send Origin on cross-origin fetches
+    if (!origin) {
+      return NextResponse.next();
+    }
+
+    // Validate origin for cross-origin requests
     if (!isOriginAllowed(origin)) {
       console.warn(`CORS Middleware: Blocked request from unauthorized origin: ${origin || 'no-origin'}`);
       return createCorsErrorResponse(origin);

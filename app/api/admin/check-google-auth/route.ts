@@ -5,21 +5,20 @@ export async function GET(request: Request) {
     // Check if OAuth environment variables are set
     const hasClientId = !!process.env.GOOGLE_CLIENT_ID;
     const hasClientSecret = !!process.env.GOOGLE_CLIENT_SECRET;
-    const hasAccessToken = !!process.env.GOOGLE_ACCESS_TOKEN;
     const hasRefreshToken = !!process.env.GOOGLE_REFRESH_TOKEN;
-    
-    // OAuth is configured if we have client credentials AND tokens
-    const isConfigured = 
-      hasClientId && 
-      hasClientSecret && 
-      hasAccessToken && 
+
+    // OAuth is configured if we have client credentials AND refresh token
+    // Access token is auto-generated from refresh token, no need to store it
+    const isConfigured =
+      hasClientId &&
+      hasClientSecret &&
       hasRefreshToken;
     
     return NextResponse.json({
       isConfigured,
       details: {
         hasClientCredentials: hasClientId && hasClientSecret,
-        hasTokens: hasAccessToken && hasRefreshToken
+        hasRefreshToken
       }
     });
   } catch (error) {
