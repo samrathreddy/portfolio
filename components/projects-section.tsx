@@ -45,6 +45,9 @@ export function ProjectsSection({
   // State for iframe loading
   const [loadedIframes, setLoadedIframes] = useState<Record<string, boolean>>({})
 
+  // State for muted videos
+  const [mutedVideos, setMutedVideos] = useState<Record<string, boolean>>({})
+
   // Client-side only code
   const [isClient, setIsClient] = useState(false)
   useEffect(() => {
@@ -381,19 +384,42 @@ export function ProjectsSection({
                             <div className="relative w-full h-full overflow-hidden bg-white">
                               {/* Use video if available, otherwise use preview (website) */}
                               {project.video ? (
-                                <video
-                                  id={`preview-${project.id}`}
-                                  ref={(el) => { if (el) videoRefs.current.set(`desktop-${project.id}`, el); }}
-                                  src={project.video}
-                                  className="absolute top-0 left-0 w-full h-full object-cover"
-                                  preload="none"
-                                  muted
-                                  loop
-                                  playsInline
-                                  onLoadedData={() => {
-                                    setLoadedIframes(prev => ({ ...prev, [project.id]: true }))
-                                  }}
-                                />
+                                <>
+                                  <video
+                                    id={`preview-${project.id}`}
+                                    ref={(el) => { if (el) videoRefs.current.set(`desktop-${project.id}`, el); }}
+                                    src={project.video}
+                                    className="absolute top-0 left-0 w-full h-full object-cover"
+                                    preload="none"
+                                    muted={mutedVideos[project.id] !== false}
+                                    loop
+                                    playsInline
+                                    onLoadedData={() => {
+                                      setLoadedIframes(prev => ({ ...prev, [project.id]: true }))
+                                    }}
+                                  />
+                                  <button
+                                    className="absolute bottom-3 right-3 z-30 p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
+                                    onClick={() => {
+                                      const isMuted = mutedVideos[project.id] !== false
+                                      setMutedVideos(prev => ({ ...prev, [project.id]: !isMuted }))
+                                      const vid = document.getElementById(`preview-${project.id}`) as HTMLVideoElement
+                                      if (vid) vid.muted = !isMuted
+                                    }}
+                                    title={mutedVideos[project.id] !== false ? "Unmute" : "Mute"}
+                                  >
+                                    {mutedVideos[project.id] !== false ? (
+                                      <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                                      </svg>
+                                    ) : (
+                                      <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                      </svg>
+                                    )}
+                                  </button>
+                                </>
                               ) : project.preview.match(/\.(mp4|mov|webm)$/) || project.preview.includes('/projects/') ? (
                                 <video
                                   id={`preview-${project.id}`}
