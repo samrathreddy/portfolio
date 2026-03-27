@@ -5,101 +5,97 @@ date: "2026-03-27"
 tags: ["Python", "Voice AI", "Side Project", "Open Source"]
 ---
 
-Wispr Flow is genuinely impressive. You hold a key, speak naturally, and it inserts polished text wherever your cursor is - emails, Slack, terminal, VS Code, anywhere. The experience is seamless.
+Wispr Flow is genuinely impressive. You hold a key, speak naturally, and it inserts polished text wherever your cursor is - emails, Slack, terminal, VS Code, anywhere. The experience feels like magic.
 
-Then the $15/month bill hits, and you start doing math. That's $180 a year for a dictation tool. Not outrageous, but not nothing either. And if you ever stop paying, it just stops working. Your workflow, your muscle memory, all gone.
+<video controls playsInline className="w-full rounded-xl border border-white/10 my-6">
+  <source src="https://pub-83a02fbc2ba441fca05462fac2790e35.r2.dev/speakink.mp4" type="video/mp4" />
+</video>
 
-I went looking for alternatives. Most of what I found was either cloud-locked, another subscription, a simple voice memo app dressed up as dictation, or just not good enough to replace Wispr Flow. So I built SpeakInk.
+Then the $15/month bill hits. That's $180 a year for a dictation tool. Not outrageous, but it got me thinking - this shouldn't cost that much. Voice recognition is a solved problem. So why is good voice dictation still locked behind a subscription?
+
+That question turned into a weekend project. That weekend turned into SpeakInk. And if you want to try it right now - [grab the repo](https://github.com/samrathreddy/Speakink), run `python setup.py`, and you're up in under 5 minutes.
+
+## The Journey to Get Here
+
+I didn't start with NVIDIA. I started with local models.
+
+My first instinct was to run everything offline. No API keys, no internet dependency, completely private. I set up Whisper locally and it worked - but it was slow. On CPU alone the latency was noticeable enough to break the flow of dictating. You'd finish a sentence and wait. That waiting kills the whole point.
+
+So I switched to looking at paid cloud options. AssemblyAI, ElevenLabs, Cartesia - all solid, all fast. But then I was just building a slightly cheaper Wispr Flow. Still paying per hour of audio, still vendor-dependent. That felt wrong. The goal wasn't to save a few dollars, it was to make this genuinely free and accessible to anyone.
+
+Then I came across NVIDIA's Parakeet TDT 0.6B v2 on build.nvidia.com. Free API. Rate-limited for personal use, but the limits are generous enough that you'd have to dictate for hours every single day to hit them.
+
+I honestly wasn't expecting much - free usually means a catch. But when I tested it, the accuracy was right there with Wispr Flow. Same level. I was genuinely amazed. Fast, clean transcripts, handles natural speech well, no weird artifacts. Running on NVIDIA's infrastructure so latency is minimal. And it costs nothing.
+
+That was the missing piece. The whole goal - free, fast, accurate, no subscriptions - suddenly had a real answer.
+
+But while I was building around Parakeet, I kept thinking - not everyone has the same needs. Some people need 99+ language support. Some people work in environments where they can't send audio to any cloud. Some people want the cleanest possible transcript for formal writing. One provider can't be perfect for everyone.
+
+So instead of building around a single provider, I built around the ability to swap them.
 
 ## How It Works
 
 Hold Right Option on macOS (or Right Alt on Windows). Speak. Release the key. Text appears at your cursor, in whatever app you're focused on.
 
-That's the whole interaction. No window to switch to, no button to click, no copy-paste. It just works the same way Wispr Flow does - except it's free and open source.
+That's the whole interaction. No window to switch to, no button to click, no copy-paste. It works in VS Code, Slack, Chrome, Terminal, Notes, email - anywhere you can type.
 
-You can also switch to toggle mode if you prefer to tap the key once to start and once to stop, rather than holding it. Both modes are available in settings and apply immediately without restarting anything.
+You can also switch to toggle mode if you prefer tapping the key once to start and once to stop. Both modes are in settings and apply immediately, no restart needed.
 
-## Why NVIDIA Parakeet?
+## Pick Your Provider, Pick Your Experience
 
-When I started building SpeakInk, the default STT provider choice was the most important decision. I wanted something free, accurate, and fast enough to not be annoying.
+This is the part I'm most proud of. Every STT provider has a different personality and different strengths. SpeakInk lets you switch between them based on what you're doing:
 
-NVIDIA released Parakeet TDT 0.6B v2 as a free API through build.nvidia.com. It uses gRPC streaming, it's rate-limited for personal use but the limits are generous enough that daily dictation use never comes close to hitting them. The accuracy is genuinely best-in-class - better than Whisper medium in my testing, and much faster since you're not running anything locally.
+| Provider | Cost | Best For |
+| --- | --- | --- |
+| NVIDIA Parakeet TDT 0.6B v2 | Free | Everyday use, best accuracy |
+| Whisper (local) | Free | Fully offline, privacy-first |
+| Cartesia | ~$0.13/hr | 99+ languages, real-time streaming |
+| AssemblyAI | ~$0.15/hr | Partial transcripts, turn detection |
+| ElevenLabs Scribe v2 | ~$0.40/hr | Speaker diarization |
 
-Getting an API key is free. Go to build.nvidia.com, create an account, grab a key, add it to your `.env` file as `NVIDIA_API_KEY`, and you're done. No credit card, no trial period that expires, no credits to run out.
+**NVIDIA Parakeet** is the default for a reason - it's free and genuinely best-in-class. For most people, most of the time, this is all you need.
 
-That's the default. It's what most people should use.
+**Whisper local** is for people who refuse to send their voice to any server, ever. If you're dictating sensitive content, working offline, or just philosophically opposed to cloud APIs, this is your provider. It's slower on CPU, fast on a decent GPU.
 
-## Provider Architecture
+**Cartesia** shines for multilingual use. If you switch between languages mid-sentence or need support for a language that NVIDIA handles less cleanly, Cartesia's 99+ language support is hard to beat.
 
-The whole system is built around swappable providers. The `ProviderRegistry` holds references to whatever STT provider, text insertion method, and AI correction provider you've configured. Adding a new STT provider means writing one file that implements the provider interface - no other code changes needed anywhere.
+**AssemblyAI** does something the others don't - it gives you partial transcripts as you're speaking. If you're building something on top of SpeakInk or just want to watch the text appear word by word, this is interesting.
 
-Here's what's available right now:
+**ElevenLabs** is the choice if you're doing interview transcription or any recording where multiple speakers are involved. Speaker diarization - knowing who said what - is unique to this provider.
 
-| Provider | Protocol | Cost | Notes |
-| --- | --- | --- | --- |
-| NVIDIA Parakeet TDT 0.6B v2 | gRPC | Free | Rate-limited, plenty for daily use |
-| Cartesia | WebSocket | ~$0.13/hr audio | 99+ languages |
-| AssemblyAI | WebSocket streaming | ~$0.15/hr audio | Real-time streaming |
-| ElevenLabs Scribe v2 | REST | ~$0.40/hr audio | Speaker diarization |
-| Whisper (local) | Local inference | Free | Fully offline, slower |
-
-At 1 hour of dictation per day (which is a lot), NVIDIA costs $0/month. Cartesia would run about $3.90/month. The others are more expensive still. For most people, NVIDIA Parakeet is the obvious choice.
-
-The Whisper local provider is there for people who want zero network dependency. If you have a decent GPU, it's fast enough. On CPU alone it can feel sluggish for longer dictation, but it's genuinely fully offline - no API key, no internet, nothing.
+Switch between them in settings. No code changes, no config file editing, just a dropdown. The whole app hot-swaps the provider live.
 
 ## Architecture Deep Dive
 
-The core of the app is `AppController`. It's initialized with five things: the STT provider, the text insertion method, the AI correction provider, a `ConfigManager`, and an `EventBus`. Everything is wired together through dependency injection - no global state, no singletons.
+The core of the app is `AppController`. It's initialized with five things: the STT provider, the text insertion method, the AI correction provider, a `ConfigManager`, and an `EventBus`. Everything is wired through dependency injection - no global state, no singletons.
 
-The `EventBus` is what keeps things decoupled. When audio recording starts, an event fires. When transcription completes, another event fires. When there's an error, it flows through the bus. Components subscribe to the events they care about and ignore the rest. This means audio processing, transcription, and UI updates are all completely independent of each other.
+The `EventBus` keeps everything decoupled. When audio recording starts, an event fires. When transcription completes, another event fires. When there's an error, it flows through the bus. Components subscribe to the events they care about and ignore the rest.
 
-The trickiest part of working with PyQt6 is its thread model. Qt is strict: you cannot update the UI from a background thread. The STT providers run on background threads for obvious reasons - you can't block the main thread while waiting for audio. So `UiBridge` exists specifically to solve this. It uses Qt signals to marshal events from background threads back to the main thread safely. Every UI update goes through `UiBridge.emit()` rather than touching Qt widgets directly.
+The trickiest part of PyQt6 is its thread model. Qt is strict - you cannot update the UI from a background thread. STT providers run on background threads, so `UiBridge` exists to solve this. It uses Qt signals to marshal events from background threads back to the main thread safely.
 
-The `ConfigManager` handles settings. When you change something in the settings UI - switch providers, toggle AI correction, change the hotkey - `on_settings_changed()` gets called and the new config propagates through the system live. No restart required for any setting.
-
-## Text Insertion
-
-There are two ways to get text into the app you're focused on.
-
-The default is keyboard simulation via `pynput`. It types the transcribed text character by character (fast enough to be imperceptible) into whatever window has focus. This works in virtually every app.
-
-Some apps block simulated keyboard input for security reasons. For those, clipboard paste is the fallback - the text goes to the clipboard and a Cmd+V (or Ctrl+V on Windows) is simulated. Less clean but reliable.
-
-WebRTC VAD (Voice Activity Detection) is what tells the app when you've stopped speaking. Rather than using a fixed timeout or just relying on you releasing the key, VAD monitors the audio stream and detects actual speech boundaries. It's surprisingly accurate at not cutting off the end of your words, and it adds almost no latency. The whole detection runs locally with no ML model - it's a signal processing algorithm that's been battle-tested in WebRTC for years.
+When you change a setting - switch providers, change the hotkey, toggle AI correction - `on_settings_changed()` gets called and everything propagates live. No restart required for any setting.
 
 ## AI Correction (Optional)
 
-Transcription is never perfect. "Let's meet at three PM" might come out as "lets meet at three p m" or worse. The AI correction step is optional but genuinely useful.
+Raw transcripts aren't always clean. "lets meet at three p m" should be "Let's meet at 3 PM." The AI correction step handles this.
 
-After the STT provider returns the raw transcript, you can optionally run it through Gemini Flash or a local Ollama model. The prompt instructs it to fix punctuation, capitalize properly, remove filler words like "um" and "uh", and format the text sensibly - without changing what you actually said.
+After transcription, you can optionally run the text through Gemini Flash or a local Ollama model. It fixes punctuation, capitalizes properly, removes filler words like "um" and "uh" - without changing what you actually said.
 
-Gemini Flash is cheap and fast. It's the right choice for most people who want AI correction. If you're already paying for Google AI Studio, it's effectively free at dictation volumes.
+Gemini Flash is the right choice for most people. Fast, cheap, and if you're already using Google AI Studio it's effectively free at dictation volumes. Ollama is fully local if you have 16GB RAM and want zero network dependency.
 
-Ollama is the fully local option. It runs a model on your machine - no network requests, no API keys. You need at least 16GB RAM to run a capable model without it being frustratingly slow. If you have that, it works well.
-
-AI correction is off by default. It adds a small amount of latency (typically 200-500ms for Gemini Flash) and most of the time the raw transcript is good enough. Turn it on if you dictate formal writing or technical content where punctuation matters.
+Off by default because the raw transcript is usually good enough. Turn it on when you're dictating formal writing or emails where polish matters.
 
 ## Building for macOS
 
-macOS has strict privacy controls that make building this kind of app non-trivial.
+macOS has strict privacy controls that make this non-trivial. Keyboard simulation via `pynput` requires Accessibility permission. Without it, the event tap silently fails - no error, your text just doesn't appear. That's a maddening bug to debug the first time.
 
-Keyboard simulation via `pynput` requires Accessibility permission. Without it, the event tap silently fails - no error, no warning, your text just doesn't appear. This is one of those bugs that's maddening to debug the first time because there's no feedback at all.
+SpeakInk handles this with a `PermissionsDialog` on first run. It detects which permissions are missing, explains what each one is for, and links directly to the right pane in System Settings. No digging through menus.
 
-Microphone access is required obviously. And because the app lives in the system tray rather than having a standard window, macOS doesn't always prompt for permissions automatically.
+## You Can Add Your Own Provider
 
-SpeakInk handles this with a `PermissionsDialog` that launches on first run. It detects which permissions are missing, explains exactly what each one is for, and links directly to the right pane in System Settings. Accessibility, Microphone, Input Monitoring - each one gets a clear explanation and a button that takes you straight there.
+The provider interface is intentionally simple. Adding a new STT provider is one file - implement the interface, register it in `ProviderRegistry`, done. No other code changes needed anywhere in the app.
 
-Getting this right required reading a lot of Apple documentation and some trial and error. The accessibility permission in particular has quirks around how it interacts with the event tap in `pynput` that aren't well documented.
-
-## What I Learned
-
-**PyQt6's thread model is non-negotiable.** The first version I built didn't have `UiBridge` - I was updating the audio level overlay directly from the audio callback thread. It worked fine most of the time and then would crash at random. Once I understood that Qt widget updates must happen on the main thread, the architecture became obvious. `UiBridge` wraps Qt signals so background threads can emit them safely and Qt routes the actual updates to the main thread.
-
-**WebRTC VAD is genuinely good.** I expected to spend days tuning audio processing logic to detect speech boundaries accurately. WebRTC VAD mostly just works. It has a few sensitivity levels and the default handles most microphone setups without any tuning.
-
-**Warmup matters.** The first transcription after startup is slower because the model connection isn't established yet. I borrowed the warmup pattern from Chrome extensions - on startup, `AppController` fires a warmup request in the background so by the time you first use the hotkey, the connection is already warm. The user never sees that first-use latency.
-
-**macOS permissions are genuinely tricky.** The accessibility permission system is designed to be difficult to bypass for good reasons. Spending time building a proper `PermissionsDialog` rather than just documenting it in a README was the right call - it makes the setup experience much smoother.
+If there's a provider you want that isn't here, the path to adding it is genuinely short. The repo has a contributing guide. A new provider is a good first PR.
 
 ## Setup
 
@@ -109,18 +105,14 @@ cd Speakink
 python setup.py
 ```
 
-`setup.py` creates a virtual environment, installs all dependencies, and launches the app. Run it again to restart. Add your `NVIDIA_API_KEY` to `.env` and you're ready to go.
+`setup.py` creates a virtual environment, installs dependencies, and launches the app. Add `NVIDIA_API_KEY` to `.env` - get a free key at build.nvidia.com - and you're done.
 
-The app lives in your system tray. Right-click for settings. The first time you run on macOS, the `PermissionsDialog` walks you through Accessibility and Microphone permissions.
+The app lives in your system tray. Right-click for settings, history, and provider switching.
 
 ## What's Next
 
-Windows support is partially built - the core architecture is cross-platform but the hotkey handling and some of the macOS-specific UI needs Windows equivalents. That's the next priority.
+Windows testing and packaging, PyInstaller builds so you don't need Python installed, and more providers. The architecture makes adding providers easy - what takes time is testing them properly across different accents, environments, and edge cases.
 
-PyInstaller packaging for native app distribution (no Python required to install) is on the list. Right now you need Python 3.12 installed, which is fine for developers but not great for general distribution.
+If you try it and something breaks, open an issue. If you add a provider, open a PR. That's how this gets better for everyone.
 
-More STT providers - there are a few good options I haven't integrated yet. The provider interface is simple enough that adding one is a few hours of work.
-
-If you try SpeakInk and run into issues, open a GitHub issue. If you add a new STT provider, I'd love a pull request.
-
-The repo is at [github.com/samrathreddy/Speakink](https://github.com/samrathreddy/Speakink).
+The repo is at [github.com/samrathreddy/Speakink](https://github.com/samrathreddy/Speakink). Free. Open source. No subscription.

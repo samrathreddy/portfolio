@@ -17,6 +17,34 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    id: "speakink",
+    subtitle: "Voice Dictation App",
+    title: "SpeakInk",
+    description: "A free, open-source voice dictation app for macOS and Windows. Hold a hotkey, speak, release - text appears at your cursor in any app. Supports NVIDIA Parakeet (free), Cartesia, AssemblyAI, ElevenLabs, and local Whisper. Optional AI correction via Gemini or Ollama. Built as a free alternative to Wispr Flow.",
+    preview: "https://pub-83a02fbc2ba441fca05462fac2790e35.r2.dev/speakink.mp4",
+    video: "https://pub-83a02fbc2ba441fca05462fac2790e35.r2.dev/speakink.mp4",
+    tech: ["Python", "PyQt6", "NVIDIA Parakeet", "Whisper", "WebSocket", "WebRTC VAD"],
+    links: {
+      github: "https://github.com/samrathreddy/Speakink",
+      article: "/blog/speakink"
+    },
+    color: "from-[#6366F1] to-[#4F46E5]"
+  },
+  {
+    id: "mail-tracker",
+    subtitle: "Email Open Tracker",
+    title: "Mail Tracker",
+    description: "A self-hosted email open tracking system that gives you read receipts for Gmail. Built with Cloudflare Workers and a Chrome Extension. Tracks when your emails are opened, with smart filtering for bots and self-opens. Runs on Cloudflare's free tier.",
+    preview: "https://pub-83a02fbc2ba441fca05462fac2790e35.r2.dev/mailtrackerdemo.mp4",
+    video: "https://pub-83a02fbc2ba441fca05462fac2790e35.r2.dev/mailtrackerdemo.mp4",
+    tech: ["Cloudflare Workers", "Cloudflare KV", "Chrome Extension", "JavaScript", "Cron Triggers"],
+    links: {
+      github: "https://github.com/samrathreddy/mail-tracker",
+      article: "/blog/mail-tracker"
+    },
+    color: "from-[#F59E0B] to-[#D97706]"
+  },
+  {
     id: "leet-ai",
     subtitle: "Leetcode AI Agent",
     title: "Leet AI",
@@ -105,32 +133,6 @@ export const projects: Project[] = [
     color: "from-[#4F46E5] to-[#7C3AED]"
   },
   {
-    id: "speakink",
-    subtitle: "Voice Dictation App",
-    title: "SpeakInk",
-    description: "A free, open-source voice dictation app for macOS and Windows. Hold a hotkey, speak, release - text appears at your cursor in any app. Supports NVIDIA Parakeet (free), Cartesia, AssemblyAI, ElevenLabs, and local Whisper. Optional AI correction via Gemini or Ollama. Built as a free alternative to Wispr Flow.",
-    preview: "https://github.com/samrathreddy/Speakink",
-    tech: ["Python", "PyQt6", "NVIDIA Parakeet", "Whisper", "WebSocket", "WebRTC VAD"],
-    links: {
-      github: "https://github.com/samrathreddy/Speakink",
-      article: "/blog/speakink"
-    },
-    color: "from-[#6366F1] to-[#4F46E5]"
-  },
-  {
-    id: "mail-tracker",
-    subtitle: "Email Open Tracker",
-    title: "Mail Tracker",
-    description: "A self-hosted email open tracking system that gives you WhatsApp-style read receipts for Gmail. Built with Cloudflare Workers and a Chrome Extension. Tracks who opened your email, when, and from where — with smart filtering for bots and self-opens. Runs on Cloudflare's free tier.",
-    preview: "https://github.com/samrathreddy/mail-tracker",
-    tech: ["Cloudflare Workers", "Cloudflare KV", "Chrome Extension", "JavaScript", "Cron Triggers"],
-    links: {
-      github: "https://github.com/samrathreddy/mail-tracker",
-      article: "/blog/mail-tracker"
-    },
-    color: "from-[#F59E0B] to-[#D97706]"
-  },
-  {
     id: "Unipay",
     subtitle: "University Fee Payment Platform",
     title: "Unipay",
@@ -144,4 +146,4 @@ export const projects: Project[] = [
     },
     color: "from-[#FFD700] to-[#FFC000]"
   }
-]; 
+];

@@ -331,14 +331,14 @@ export function ProjectsSection({
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C6.477 2 2 6.477 2 12c0 5.524 4.477 10 10 10s10-4.476 10-10c0-5.523-4.477-10-10-10z" />
                                   </svg>
                                   <span className="text-xs text-white/60 font-medium truncate">
-                                    {getHostname(project.preview)}
+                                    {getHostname(project.links.website || project.links.github || project.preview)}
                                   </span>
                                 </>
                               )}
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <button 
+                            <button
                               className="p-1.5 rounded-md hover:bg-white/5 transition-colors"
                               onClick={() => {
                                 const element = document.getElementById(`preview-${project.id}`) as HTMLIFrameElement | HTMLVideoElement;
@@ -357,8 +357,8 @@ export function ProjectsSection({
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                               </svg>
                             </button>
-                            <a 
-                              href={project.preview}
+                            <a
+                              href={project.links.website || project.links.github || project.preview}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="p-1.5 rounded-md hover:bg-white/5 transition-colors"

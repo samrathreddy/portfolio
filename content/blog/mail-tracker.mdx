@@ -9,7 +9,11 @@ You send a cold email for a job application. Then you wait. Did they even open i
 
 Gmail has read receipts, but they only work if the recipient explicitly accepts them. Nobody does. So you're left refreshing your sent folder like a maniac, wondering whether to follow up.
 
-I got tired of this. So I built my own solution.
+I got tired of this. So I built my own solution. Here's the full thing working end-to-end:
+
+<video controls playsInline className="w-full rounded-xl border border-white/10 my-6">
+  <source src="https://pub-83a02fbc2ba441fca05462fac2790e35.r2.dev/mail-tracker-walkthrough.mp4" type="video/mp4" />
+</video>
 
 ## The Concept: The Tracking Pixel
 
@@ -35,6 +39,10 @@ A serverless function running on Cloudflare's edge network. It handles three end
 
 All open data is stored in **Cloudflare KV** - a key-value store that's globally distributed and fast for reads. Each email gets a key like `opens:abc123` with a JSON array of open timestamps.
 
+When an open is detected, the Worker doesn't fire the notification immediately. Instead it pushes a job onto a **Cloudflare Queue**. A separate consumer Worker picks it up, waits a few seconds (to let the self-open detection from the extension catch up), and only then fires the webhook if the open is still marked as genuine. This way you never get pinged for your own opens, even if there's a race between the pixel load and the extension calling `/self`.
+
+The notifications themselves go to **Slack or Discord** - whichever you configure. Just drop a webhook URL in your `.env` and you'll get a message like "someone opened your email: Subject Line" the moment a real open comes through. No polling, no dashboard-checking, just a ping straight to where you already live.
+
 **2. Chrome Extension (Manifest V3)**
 
 A service-worker-based extension that does two things:
@@ -52,8 +60,9 @@ Here's the full flow from send to notification:
 2. You hit Send - the Chrome Extension intercepts this, generates a unique `emailId` (a random hex string), and injects `<img src="https://your-worker.dev/pixel/emailId" width="1" height="1">` into the email body
 3. The email lands in the recipient's inbox
 4. They open it - their email client fetches all images, including your pixel (via a proxy)
-5. Cloudflare Worker receives the request and records `{ timestamp, emailId }` in KV
-6. You check your dashboard and see the open event
+5. Cloudflare Worker receives the request, records `{ timestamp, emailId }` in KV, and pushes a job to a Cloudflare Queue
+6. The Queue consumer waits a few seconds, checks if it's still a genuine open (not a self-open), then fires a webhook to your Slack or Discord
+7. You get a notification in real time - no dashboard-checking needed
 
 The pixel endpoint:
 
