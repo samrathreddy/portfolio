@@ -1,0 +1,207 @@
+---
+title: "I Built a Self-Hosted Email Tracker with WhatsApp-Style Read Receipts"
+subtitle: "How I built a privacy-first email open tracking system using Cloudflare Workers and a Chrome Extension — for $0/month"
+date: "2026-03-27"
+tags: ["Cloudflare Workers", "Chrome Extension", "Side Project"]
+---
+
+You send a cold email for a job application. Then you wait. Did they even open it? Did it go to spam? Did they read it and ghost you, or has it been sitting unread in their inbox for three days?
+
+Gmail has read receipts, but they only work if the recipient explicitly accepts them. Nobody does. So you're left refreshing your sent folder like a maniac, wondering whether to follow up.
+
+I got tired of this. So I built my own solution.
+
+## The Concept: The Tracking Pixel
+
+Email tracking has existed for years — it's how every marketing platform like Mailchimp and HubSpot knows when you open their newsletters. The mechanism is deceptively simple: a **1×1 transparent PNG** embedded in the email body.
+
+When your email client renders the email, it fetches all remote images — including that invisible pixel. That fetch request hits a server, which logs the timestamp, IP address, and user agent. You just got a read receipt.
+
+The magic is that it's completely invisible to the recipient. They see a normal email. You see, on your end, exactly when they opened it.
+
+## Architecture: Two Components
+
+The system has two parts that work together:
+
+**1. Cloudflare Workers (the backend)**
+
+A serverless function running on Cloudflare's edge network. It handles three endpoints:
+
+- `GET /pixel/:emailId` — serves the 1×1 tracking pixel and logs the open
+- `POST /self/:emailId` — called by the extension to mark a self-open (so you don't count your own opens)
+- `GET /stats/:emailId` — returns open events for the dashboard
+
+All open data is stored in **Cloudflare KV** — a key-value store that's globally distributed and blindingly fast for reads. Each email gets a key like `opens:abc123` with a JSON array of open events.
+
+**2. Chrome Extension (Manifest V3)**
+
+A service-worker-based extension that does two things:
+
+- **Injects the tracking pixel** automatically when you hit "Send" in Gmail
+- **Detects self-opens** by scanning the DOM when you open your own sent emails, then calling the `/self` endpoint
+
+The extension uses Gmail's DOM structure to intercept the send action, generate a unique email ID, and append an `<img>` tag pointing to your Cloudflare Worker URL before the email goes out.
+
+## How It Works End-to-End
+
+Here's the full flow from send to notification:
+
+1. You compose an email in Gmail
+2. You hit Send — the Chrome Extension intercepts this, generates a unique `emailId` (a random hex string), and injects `<img src="https://your-worker.dev/pixel/emailId" width="1" height="1">` into the email body
+3. The email lands in the recipient's inbox
+4. They open it — their email client fetches all images, including your pixel
+5. Cloudflare Worker receives the request, records `{ timestamp, ip, userAgent, emailId }` in KV
+6. You check your dashboard and see the open event
+
+The pixel endpoint itself is straightforward:
+
+```js
+async function handlePixel(emailId, request, env) {
+  const ip = request.headers.get('CF-Connecting-IP')
+  const userAgent = request.headers.get('User-Agent') || ''
+
+  if (isBot(userAgent) || isSelfOpen(emailId, ip, env)) {
+    return pixelResponse()
+  }
+
+  const opens = await env.OPENS_KV.get(`opens:${emailId}`, 'json') || []
+  opens.push({ timestamp: Date.now(), ip, userAgent })
+  await env.OPENS_KV.put(`opens:${emailId}`, JSON.stringify(opens))
+
+  return pixelResponse()
+}
+
+function pixelResponse() {
+  const pixel = new Uint8Array([
+    0x47,0x49,0x46,0x38,0x39,0x61,0x01,0x00,
+    0x01,0x00,0x00,0xff,0x00,0x2c,0x00,0x00,
+    0x00,0x00,0x01,0x00,0x01,0x00,0x00,0x02,
+    0x00,0x3b
+  ])
+  return new Response(pixel, {
+    headers: { 'Content-Type': 'image/gif', 'Cache-Control': 'no-store' }
+  })
+}
+```
+
+Note the `Cache-Control: no-store` header — critical. Without it, email clients (or CDNs) will cache the pixel and you'll only ever see one open event per recipient.
+
+## The Hard Part: Filtering False Positives
+
+This is where most naive implementations fail. Raw pixel loads are full of noise:
+
+**Apple Mail Privacy Protection (MPP)**
+
+Introduced in iOS 15 and macOS Monterey, Apple Mail pre-fetches all remote images before the user even opens the email — routing requests through Apple's proxy servers. The user agent looks like `Mozilla/5.0 (Macintosh; ...)` but the IP belongs to Apple's data centers.
+
+Filtering it: check for Apple's known proxy IP ranges (they publish them), and look for suspicious patterns like multiple opens within milliseconds from different geographic locations.
+
+**Gmail Image Proxy**
+
+Gmail routes all image loads through `googleusercontent.com` proxies. This means every Gmail user appears to open from the same Google IP, making IP-based geolocation useless for Gmail recipients. You can still detect opens (the proxy does fetch the image), but you can't get meaningful location data.
+
+**Microsoft SafeLinks / Outlook scanning**
+
+Outlook's security systems pre-scan URLs and images in emails. You'll see a bot-like user agent string — typically something with `Microsoft` or `Safety` in the name.
+
+The bot detection logic:
+
+```js
+const BOT_PATTERNS = [
+  /googlebot/i,
+  /bingbot/i,
+  /yahoo.*slurp/i,
+  /duckduckbot/i,
+  /facebookexternalhit/i,
+  /preview/i,
+  /safety/i,
+  /scanner/i,
+]
+
+function isBot(userAgent) {
+  return BOT_PATTERNS.some(pattern => pattern.test(userAgent))
+}
+```
+
+**Self-Opens**
+
+When you open your own sent email to check it, that's not a real open. The Chrome Extension handles this by:
+
+1. Detecting when you're viewing a sent email (checking Gmail's URL pattern and DOM)
+2. Finding the injected pixel `<img>` tag in the email body
+3. Extracting the `emailId` from the src attribute
+4. Immediately calling `POST /self/:emailId` with your IP
+
+The Worker then marks that IP as the "sender IP" for that email and ignores future opens from it.
+
+**Deduplication Window**
+
+Some email clients fire multiple image load requests in rapid succession (pre-rendering, prefetching). A 5-second dedup window handles this: if the same IP loads the same pixel twice within 5 seconds, it counts as one open.
+
+```js
+const DEDUP_WINDOW_MS = 5000
+
+function isDuplicate(opens, ip) {
+  const recent = opens.filter(o => o.ip === ip)
+  if (!recent.length) return false
+  const lastOpen = recent[recent.length - 1]
+  return Date.now() - lastOpen.timestamp < DEDUP_WINDOW_MS
+}
+```
+
+## The Dashboard
+
+A simple web dashboard (static HTML served from the same Worker) shows:
+
+- **Per-email timeline** — each open as a point on a timeline, with timestamp and location
+- **Calendar heatmap** — GitHub-contribution-style grid showing which days people read your emails
+- **Peak hours chart** — bar chart of opens by hour of day, so you can optimize when you send
+
+The KV structure makes this efficient: each email's opens are stored as a single JSON array under `opens:${emailId}`, so fetching stats for one email is a single KV read.
+
+A Cloudflare Cron Trigger runs daily to clean up open data older than 90 days, keeping storage tidy within the free tier limits.
+
+## Running for Free
+
+Cloudflare's free tier is remarkably generous:
+
+| Feature | Free Tier Limit |
+|---|---|
+| Worker requests | 100,000/day |
+| KV reads | 100,000/day |
+| KV writes | 1,000/day |
+| KV storage | 1 GB |
+| Cron Triggers | Included |
+
+For personal use — even heavy personal use — this is more than enough. I send maybe 20-30 tracked emails a day. Even if each one gets opened 10 times, that's 200-300 pixel loads per day. The free tier handles this with room to spare.
+
+Total monthly cost: **$0**.
+
+## What I Learned
+
+**Apple Mail Privacy Protection is a real problem.** When it launched, it broke a lot of email tracking tools overnight. The key insight is that MPP always loads images before the user opens the email — so the timing is wrong (opens happen before the email was "opened") and the IP is Apple's, not the user's. You can still detect that an email was _received_ and processed, but not that it was _read_.
+
+**Cloudflare Workers has V8 isolate constraints.** No Node.js APIs. No `fs`, no `crypto` (well, you get `crypto.randomUUID()` via the Web Crypto API, but not the full Node crypto module). Early on I tried to use `Buffer` and got a runtime error — had to switch to `TextEncoder`/`TextDecoder` and `Uint8Array` throughout.
+
+**Chrome Extension Manifest V3 killed background pages.** MV3 replaces persistent background pages with service workers, which can be terminated at any time. Any state you store in memory (like a map of tabId → emailId) can disappear between events. I had to move all state to `chrome.storage.session` to survive service worker restarts.
+
+**KV is eventually consistent.** Cloudflare KV has eventual consistency across regions — a write in one data center might not be immediately visible in another. For open tracking this is fine (a few seconds of lag doesn't matter), but I had to be careful with the dedup logic: two near-simultaneous opens from different regions could both pass the dedup check before either write is visible globally.
+
+## Try It Yourself
+
+The full source is on GitHub at [github.com/samrathreddy/mail-tracker](https://github.com/samrathreddy/mail-tracker).
+
+Setup takes about 5 minutes:
+
+1. Clone the repo
+2. `wrangler deploy` to push the Worker to Cloudflare
+3. Load the unpacked Chrome Extension in `chrome://extensions`
+4. Configure your Worker URL in the extension settings
+
+No accounts, no subscriptions, no data leaving your control. Your open data lives in your own Cloudflare KV namespace.
+
+---
+
+The whole project came together in a weekend. The hardest part wasn't the code — it was understanding all the edge cases around bot filtering and Apple MPP. If you're building anything that depends on email open rates, those two things will humble you fast.
+
+If you build on top of this or have ideas for improvements, open an issue on GitHub. I'd especially love to see a Firefox extension port — the Gmail DOM APIs are the same, it's mostly just the extension manifest format that differs.

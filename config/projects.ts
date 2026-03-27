@@ -10,6 +10,7 @@ export interface Project {
     website?: string;
     github?: string;
     video?: string;
+    article?: string;
   };
   color: string;
 }
@@ -102,6 +103,19 @@ export const projects: Project[] = [
       video: "https://www.loom.com/share/52583e6b1b684f6b8570b6751e286809"
     },
     color: "from-[#4F46E5] to-[#7C3AED]"
+  },
+  {
+    id: "mail-tracker",
+    subtitle: "Email Open Tracker",
+    title: "Mail Tracker",
+    description: "A self-hosted email open tracking system that gives you WhatsApp-style read receipts for Gmail. Built with Cloudflare Workers and a Chrome Extension. Tracks who opened your email, when, and from where — with smart filtering for bots and self-opens. Runs on Cloudflare's free tier.",
+    preview: "https://github.com/samrathreddy/mail-tracker",
+    tech: ["Cloudflare Workers", "Cloudflare KV", "Chrome Extension", "JavaScript", "Cron Triggers"],
+    links: {
+      github: "https://github.com/samrathreddy/mail-tracker",
+      article: "/blog/mail-tracker"
+    },
+    color: "from-[#F59E0B] to-[#D97706]"
   },
   {
     id: "Unipay",

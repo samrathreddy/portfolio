@@ -257,6 +257,9 @@ export function NavHeader() {
                   <Link href="#projects" className="text-[#989898] hover:text-white transition-colors text-sm font-medium">
                     Projects
                   </Link>
+                  <Link href="/blog" className="text-[#989898] hover:text-white transition-colors text-sm font-medium">
+                    Blog
+                  </Link>
                   <Link href="#contact" className="text-[#989898] hover:text-white transition-colors text-sm font-medium">
                     Contact
                   </Link>
@@ -273,6 +276,9 @@ export function NavHeader() {
                   </Link>
                   <Link href="#projects" className="text-[#989898] hover:text-white transition-colors text-xs font-medium">
                     Projects
+                  </Link>
+                  <Link href="/blog" className="text-[#989898] hover:text-white transition-colors text-xs font-medium">
+                    Blog
                   </Link>
                   <Link href="#contact" className="text-[#989898] hover:text-white transition-colors text-xs font-medium">
                     Contact
@@ -440,6 +446,16 @@ export function NavHeader() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Contact
+                  </Link>
+                  <Link
+                    href="/blog"
+                    className={cn(
+                      "block text-[#989898] hover:text-white transition-colors font-medium",
+                      isTablet ? "text-base" : "text-sm"
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Blog
                   </Link>
                 </div>
 
