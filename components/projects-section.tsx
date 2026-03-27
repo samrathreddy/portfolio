@@ -391,7 +391,7 @@ export function ProjectsSection({
                                     src={project.video}
                                     className="absolute top-0 left-0 w-full h-full object-cover"
                                     preload="none"
-                                    muted={mutedVideos[project.id] !== false}
+                                    muted
                                     loop
                                     playsInline
                                     onLoadedData={() => {
@@ -401,14 +401,14 @@ export function ProjectsSection({
                                   <button
                                     className="absolute bottom-3 right-3 z-30 p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
                                     onClick={() => {
-                                      const isMuted = mutedVideos[project.id] !== false
-                                      setMutedVideos(prev => ({ ...prev, [project.id]: !isMuted }))
+                                      const audioEnabled = mutedVideos[project.id] === true
+                                      setMutedVideos(prev => ({ ...prev, [project.id]: !audioEnabled }))
                                       const vid = document.getElementById(`preview-${project.id}`) as HTMLVideoElement
-                                      if (vid) vid.muted = !isMuted
+                                      if (vid) vid.muted = audioEnabled
                                     }}
-                                    title={mutedVideos[project.id] !== false ? "Unmute" : "Mute"}
+                                    title={mutedVideos[project.id] === true ? "Mute" : "Unmute"}
                                   >
-                                    {mutedVideos[project.id] !== false ? (
+                                    {mutedVideos[project.id] === true ? (
                                       <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
