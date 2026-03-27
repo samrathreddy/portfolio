@@ -3,16 +3,42 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import { NavHeader } from '@/components/nav-header'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import remarkGfm from 'remark-gfm'
 
 export async function generateStaticParams() {
   const posts = getAllPosts()
   return posts.map(p => ({ slug: p.slug }))
 }
 
+const SITE_URL = 'https://samrath.bio'
+
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   try {
     const post = getPostBySlug(params.slug)
-    return { title: `${post.title} | Samrath`, description: post.subtitle }
+    return {
+      title: `${post.title} | Samrath Reddy`,
+      description: post.subtitle,
+      authors: [{ name: 'Samrath Reddy', url: SITE_URL }],
+      openGraph: {
+        title: post.title,
+        description: post.subtitle,
+        url: `${SITE_URL}/blog/${post.slug}`,
+        siteName: 'Samrath Reddy',
+        type: 'article',
+        publishedTime: post.date,
+        authors: ['Samrath Reddy'],
+        tags: post.tags,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: post.title,
+        description: post.subtitle,
+        creator: '@samrathreddy',
+      },
+      alternates: {
+        canonical: `${SITE_URL}/blog/${post.slug}`,
+      },
+    }
   } catch {
     return { title: 'Not Found' }
   }
@@ -26,10 +52,41 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     notFound()
   }
 
+  // JSON-LD structured data: all values are server-side constants or post
+  // metadata from local MDX files — no user-supplied input is interpolated.
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.subtitle,
+    author: {
+      '@type': 'Person',
+      name: 'Samrath Reddy',
+      url: SITE_URL,
+    },
+    datePublished: post.date,
+    dateModified: post.date,
+    publisher: {
+      '@type': 'Person',
+      name: 'Samrath Reddy',
+      url: SITE_URL,
+    },
+    url: `${SITE_URL}/blog/${params.slug}`,
+    keywords: post.tags.join(', '),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/blog/${params.slug}`,
+    },
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <NavHeader />
-      <main className="max-w-2xl mx-auto px-6 pt-32 pb-24">
+      <main className="max-w-5xl mx-auto px-6 pt-32 pb-24">
         {/* Back link */}
         <Link href="/blog" className="inline-flex items-center gap-2 text-[#989898] hover:text-white transition-colors text-sm mb-12">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,11 +126,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           prose-strong:text-white
           prose-code:text-amber-300 prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
           prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 prose-pre:rounded-xl
+          [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none [&_pre_code]:text-inherit [&_pre_code]:text-base
           prose-blockquote:border-amber-500 prose-blockquote:text-[#989898]
           prose-hr:border-white/10
           prose-li:text-[#ccc]
         ">
-          <MDXRemote source={post.content} />
+          <MDXRemote source={post.content} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
         </article>
 
         {/* Footer */}

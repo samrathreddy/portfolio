@@ -3,8 +3,24 @@ import { getAllPosts } from '@/lib/blog'
 import { NavHeader } from '@/components/nav-header'
 
 export const metadata = {
-  title: 'Blog | Samrath',
-  description: 'Articles about building software, side projects, and engineering insights.',
+  title: 'Blog | Samrath Reddy',
+  description: 'Articles about building software, side projects, and engineering insights by Samrath Reddy.',
+  openGraph: {
+    title: 'Blog | Samrath Reddy',
+    description: 'Articles about building software, side projects, and engineering insights.',
+    url: 'https://samrath.bio/blog',
+    siteName: 'Samrath Reddy',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Blog | Samrath Reddy',
+    description: 'Articles about building software, side projects, and engineering insights.',
+    creator: '@samrathreddy',
+  },
+  alternates: {
+    canonical: 'https://samrath.bio/blog',
+  },
 }
 
 export default function BlogPage() {

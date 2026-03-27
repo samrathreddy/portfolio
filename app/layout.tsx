@@ -10,6 +10,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://samrath.bio'),
   title: "Samrath Reddy | Full Stack Developer Portfolio & Projects",
   description: "Discover Samrath Reddy's personal portfolio: Full Stack Developer skilled in React, Node.js, TypeScript, and modern web technologies. Explore projects, skills, tech stack, and professional experience.",
   keywords: [
@@ -50,7 +51,7 @@ export const metadata: Metadata = {
     title: "Samrath Reddy | Full Stack Developer & AI Engineer",
     description: "Discover Samrath Reddy's personal portfolio: Full Stack Developer skilled in React, Node.js, TypeScript, and modern web technologies. Explore projects, skills, tech stack, and professional experience.",
     url: "https://samrath.bio/",
-    siteName: "Samrath Reddy Portfolio",
+    siteName: "Samrath Reddy",
     images: [
       {
         url: "https://samrath.bio/image.png",
@@ -59,19 +60,23 @@ export const metadata: Metadata = {
         alt: "Samrath Reddy Portfolio"
       }
     ],
-    locale: "en_IN",
+    locale: "en_US",
     type: "website"
   },
   twitter: {
     card: "summary_large_image",
     title: "Samrath Reddy | Full Stack Developer Portfolio & Projects",
     description: "Discover Samrath Reddy's personal portfolio: Full Stack Developer skilled in React, Node.js, TypeScript, and modern web technologies. Explore projects, skills, tech stack, and professional experience.",
-    site: "@samrathghana",
-    creator: "@samrathghana",
+    site: "@samrathreddy",
+    creator: "@samrathreddy",
     images: ["https://samrath.bio/image.png"]
   },
   alternates: {
-    canonical: "https://samrathdev.vercel.app/" // Update to your actual domain
+    canonical: "https://samrath.bio/"
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 }
 

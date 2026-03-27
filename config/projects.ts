@@ -105,6 +105,19 @@ export const projects: Project[] = [
     color: "from-[#4F46E5] to-[#7C3AED]"
   },
   {
+    id: "speakink",
+    subtitle: "Voice Dictation App",
+    title: "SpeakInk",
+    description: "A free, open-source voice dictation app for macOS and Windows. Hold a hotkey, speak, release - text appears at your cursor in any app. Supports NVIDIA Parakeet (free), Cartesia, AssemblyAI, ElevenLabs, and local Whisper. Optional AI correction via Gemini or Ollama. Built as a free alternative to Wispr Flow.",
+    preview: "https://github.com/samrathreddy/Speakink",
+    tech: ["Python", "PyQt6", "NVIDIA Parakeet", "Whisper", "WebSocket", "WebRTC VAD"],
+    links: {
+      github: "https://github.com/samrathreddy/Speakink",
+      article: "/blog/speakink"
+    },
+    color: "from-[#6366F1] to-[#4F46E5]"
+  },
+  {
     id: "mail-tracker",
     subtitle: "Email Open Tracker",
     title: "Mail Tracker",

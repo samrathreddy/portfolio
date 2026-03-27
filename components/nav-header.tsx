@@ -4,9 +4,12 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Menu, Github, Linkedin, FileText, Code2, X } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
+import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 export function NavHeader() {
+  const pathname = usePathname()
+  const isBlogPage = pathname.startsWith('/blog')
   const [scrollProgress, setScrollProgress] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [windowWidth, setWindowWidth] = useState(0)
@@ -245,7 +248,7 @@ export function NavHeader() {
             </div>
 
             {/* Desktop/Large Tablet Navigation Links */}
-            {isDesktop && (
+            {isDesktop && !isBlogPage && (
               <div className="flex-1 flex items-center justify-center">
                 <div className="flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
                   <Link href="#about" className="text-[#989898] hover:text-white transition-colors text-sm font-medium">
@@ -268,7 +271,7 @@ export function NavHeader() {
             )}
 
             {/* Tablet Navigation Links - Condensed */}
-            {isLargeTablet && !isDesktop && (
+            {isLargeTablet && !isDesktop && !isBlogPage && (
               <div className="flex-1 flex items-center justify-center">
                 <div className="flex items-center gap-6">
                   <Link href="#about" className="text-[#989898] hover:text-white transition-colors text-xs font-medium">
@@ -287,8 +290,15 @@ export function NavHeader() {
               </div>
             )}
 
+            {/* Home link on blog pages - Desktop */}
+            {isDesktop && isBlogPage && (
+              <Link href="/" className="text-[#989898] hover:text-white transition-colors text-sm font-medium ml-auto">
+                Home
+              </Link>
+            )}
+
             {/* Social Links and Resume Button - Desktop */}
-            {isDesktop && (
+            {isDesktop && !isBlogPage && (
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
                   <Link
@@ -343,7 +353,7 @@ export function NavHeader() {
             )}
 
             {/* Tablet Actions - Simplified */}
-            {isLargeTablet && !isDesktop && (
+            {isLargeTablet && !isDesktop && !isBlogPage && (
               <div className="flex items-center gap-2">
                 <Link href="/resume">
                   <Button 
@@ -373,7 +383,7 @@ export function NavHeader() {
             )}
 
             {/* Mobile Menu Button */}
-            {(isMobile || (isTablet && !isLargeTablet)) && (
+            {(isMobile || (isTablet && !isLargeTablet)) && !isBlogPage && (
               <button
                 ref={menuButtonRef}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -393,7 +403,7 @@ export function NavHeader() {
           </div>
 
           {/* Enhanced Mobile/Tablet Menu */}
-          {mobileMenuOpen && !isDesktop && (
+          {mobileMenuOpen && !isDesktop && !isBlogPage && (
             <div
               ref={mobileMenuRef}
               className={cn(
