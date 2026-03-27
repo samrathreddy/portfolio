@@ -421,7 +421,7 @@ export function ProjectsSection({
                                       </div>
                                     </div>
                                   )}
-                                  <div className="absolute bottom-3 right-3 z-30 flex gap-1.5">
+                                  <div className="absolute bottom-3 right-3 z-30 flex gap-1.5 pointer-events-auto">
                                     <button
                                       className="p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
                                       onClick={() => {
@@ -534,6 +534,7 @@ export function ProjectsSection({
                               className="relative aspect-video rounded-xl overflow-hidden border border-white/20 mb-6"
                             >
                               <video
+                                id={`mobile-preview-${project.id}`}
                                 ref={(el) => { if (el) videoRefs.current.set(`mobile-${project.id}`, el); }}
                                 src={project.video}
                                 className="w-full h-full object-cover"
@@ -543,6 +544,63 @@ export function ProjectsSection({
                                 playsInline
                                 controls={false}
                               />
+                              {/* Tap-for-audio overlay (speakink only) */}
+                              {project.id === "speakink" && mutedVideos[`mobile-${project.id}`] !== true && (
+                                <div
+                                  className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer"
+                                  onClick={() => {
+                                    setMutedVideos(prev => ({ ...prev, [`mobile-${project.id}`]: true }))
+                                    const vid = document.getElementById(`mobile-preview-${project.id}`) as HTMLVideoElement
+                                    if (vid) { vid.muted = false; vid.play().catch(() => {}) }
+                                  }}
+                                >
+                                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 text-white/80 text-xs font-medium">
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                    </svg>
+                                    Tap for audio
+                                  </div>
+                                </div>
+                              )}
+                              {/* Mobile controls */}
+                              <div className="absolute bottom-2 right-2 z-30 flex gap-1.5">
+                                <button
+                                  className="p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
+                                  onClick={() => {
+                                    const vid = document.getElementById(`mobile-preview-${project.id}`) as HTMLVideoElement
+                                    if (vid) {
+                                      if (vid.requestFullscreen) vid.requestFullscreen()
+                                      else if ((vid as any).webkitRequestFullscreen) (vid as any).webkitRequestFullscreen()
+                                    }
+                                  }}
+                                  title="Fullscreen"
+                                >
+                                  <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                                  </svg>
+                                </button>
+                                <button
+                                  className="p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
+                                  onClick={() => {
+                                    const audioEnabled = mutedVideos[`mobile-${project.id}`] === true
+                                    setMutedVideos(prev => ({ ...prev, [`mobile-${project.id}`]: !audioEnabled }))
+                                    const vid = document.getElementById(`mobile-preview-${project.id}`) as HTMLVideoElement
+                                    if (vid) vid.muted = audioEnabled
+                                  }}
+                                  title={mutedVideos[`mobile-${project.id}`] === true ? "Mute" : "Unmute"}
+                                >
+                                  {mutedVideos[`mobile-${project.id}`] === true ? (
+                                    <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                                    </svg>
+                                  ) : (
+                                    <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                    </svg>
+                                  )}
+                                </button>
+                              </div>
                             </motion.div>
                           )}
 
