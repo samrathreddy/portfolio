@@ -73,7 +73,7 @@ export function ProjectsSection({
           }
         });
       },
-      { threshold: 0.25 }
+      { threshold: 0.1, rootMargin: '200px' }
     );
 
     videoRefs.current.forEach((video) => observer.observe(video));

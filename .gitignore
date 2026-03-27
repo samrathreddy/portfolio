@@ -35,4 +35,10 @@ next-env.d.ts
 
 # IDE
 .vscode/
-.idea/ 
+.idea/
+
+# Videos (large binary files, served from R2)
+/videos/
+
+# Wrangler
+.wrangler/
