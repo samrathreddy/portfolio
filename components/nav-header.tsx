@@ -382,6 +382,13 @@ export function NavHeader() {
               </div>
             )}
 
+            {/* Mobile Home link on blog pages */}
+            {(isMobile || (isTablet && !isLargeTablet)) && isBlogPage && (
+              <Link href="/" className="text-[#989898] hover:text-white transition-colors text-sm font-medium">
+                Home
+              </Link>
+            )}
+
             {/* Mobile Menu Button */}
             {(isMobile || (isTablet && !isLargeTablet)) && !isBlogPage && (
               <button
