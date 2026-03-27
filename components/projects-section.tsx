@@ -70,7 +70,12 @@ export function ProjectsSection({
               video.preload = 'auto';
               video.load();
             }
-            video.play().catch(() => {});
+            video.muted = false;
+            video.play().catch(() => {
+              // Browser blocked autoplay with audio - fall back to muted
+              video.muted = true;
+              video.play().catch(() => {});
+            });
           } else {
             video.pause();
           }
@@ -391,15 +396,30 @@ export function ProjectsSection({
                                     src={project.video}
                                     className="absolute top-0 left-0 w-full h-full object-cover"
                                     preload="none"
-                                    muted
                                     loop
                                     playsInline
                                     onLoadedData={() => {
                                       setLoadedIframes(prev => ({ ...prev, [project.id]: true }))
                                     }}
                                   />
+                                  <div className="absolute bottom-3 right-3 z-30 flex gap-1.5">
                                   <button
-                                    className="absolute bottom-3 right-3 z-30 p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
+                                    className="p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
+                                    onClick={() => {
+                                      const vid = document.getElementById(`preview-${project.id}`) as HTMLVideoElement
+                                      if (vid) {
+                                        if (vid.requestFullscreen) vid.requestFullscreen()
+                                        else if ((vid as any).webkitRequestFullscreen) (vid as any).webkitRequestFullscreen()
+                                      }
+                                    }}
+                                    title="Fullscreen"
+                                  >
+                                    <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    className="p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
                                     onClick={() => {
                                       const audioEnabled = mutedVideos[project.id] === true
                                       setMutedVideos(prev => ({ ...prev, [project.id]: !audioEnabled }))
@@ -419,6 +439,7 @@ export function ProjectsSection({
                                       </svg>
                                     )}
                                   </button>
+                                  </div>
                                 </>
                               ) : project.preview.match(/\.(mp4|mov|webm)$/) || project.preview.includes('/projects/') ? (
                                 <video
