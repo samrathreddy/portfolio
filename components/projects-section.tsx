@@ -403,8 +403,8 @@ export function ProjectsSection({
                                       setLoadedIframes(prev => ({ ...prev, [project.id]: true }))
                                     }}
                                   />
-                                  {/* Tap-to-unmute overlay — shown until first click */}
-                                  {mutedVideos[project.id] !== true && (
+                                  {/* Tap-to-unmute overlay — only for projects with meaningful audio */}
+                                  {project.id === "speakink" && mutedVideos[project.id] !== true && (
                                     <div
                                       className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer"
                                       onClick={() => {
