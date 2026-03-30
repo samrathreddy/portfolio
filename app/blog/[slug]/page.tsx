@@ -1,6 +1,8 @@
 import { getPostBySlug, getAllPosts } from '@/lib/blog'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import { NavHeader } from '@/components/nav-header'
+import { WalineComments } from '@/components/waline-comments'
+import { WalinePageview } from '@/components/waline-pageview'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import remarkGfm from 'remark-gfm'
@@ -115,6 +117,8 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             <span>{new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
             <span>·</span>
             <span>{post.readingTime}</span>
+            <span>·</span>
+            <WalinePageview path={`/blog/${params.slug}`} update={true} />
           </div>
         </header>
 
@@ -132,6 +136,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         ">
           <MDXRemote source={post.content} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
         </article>
+
+        {/* Comments */}
+        <WalineComments path={`/blog/${params.slug}`} />
 
         {/* Footer */}
         <div className="mt-16 pt-8 border-t border-black/10 dark:border-white/5">

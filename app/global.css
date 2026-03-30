@@ -195,6 +195,35 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Waline comment system - light/dark theme overrides */
+.waline-container {
+  --waline-font-size: 15px;
+}
+
+html:not(.dark) .waline-container {
+  --waline-color: #333;
+  --waline-bg-color: #fff;
+  --waline-bg-color-light: #f8f8f8;
+  --waline-border-color: rgba(0, 0, 0, 0.1);
+  --waline-disable-bg-color: #f0f0f0;
+  --waline-disable-color: #999;
+  --waline-bq-color: #f0f0f0;
+  --waline-info-bg-color: #f8f8f8;
+  --waline-info-color: #666;
+}
+
+html.dark .waline-container {
+  --waline-color: #ccc;
+  --waline-bg-color: #0a0a0a;
+  --waline-bg-color-light: #111;
+  --waline-border-color: rgba(255, 255, 255, 0.1);
+  --waline-disable-bg-color: #1a1a1a;
+  --waline-disable-color: #666;
+  --waline-bq-color: #1a1a1a;
+  --waline-info-bg-color: #111;
+  --waline-info-color: #989898;
+}
+
 @keyframes shake {
   0%,
   100% {
