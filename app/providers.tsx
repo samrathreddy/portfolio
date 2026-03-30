@@ -2,6 +2,7 @@
 
 import posthog from "posthog-js"
 import { PostHogProvider as PHProvider } from "posthog-js/react"
+import { ThemeProvider } from "next-themes"
 import { useEffect } from "react"
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
@@ -16,5 +17,11 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-  return <PHProvider client={posthog}>{children}</PHProvider>
+  return (
+    <PHProvider client={posthog}>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+        {children}
+      </ThemeProvider>
+    </PHProvider>
+  )
 }

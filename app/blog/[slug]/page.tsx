@@ -80,7 +80,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -88,7 +88,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
       <NavHeader />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-24 sm:pt-32 pb-16 sm:pb-24">
         {/* Back link */}
-        <Link href="/blog" className="inline-flex items-center gap-2 text-[#989898] hover:text-white transition-colors text-sm mb-8 sm:mb-12">
+        <Link href="/blog" className="inline-flex items-center gap-2 text-[#666] dark:text-[#989898] hover:text-black dark:hover:text-white transition-colors text-sm mb-8 sm:mb-12">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 12H5m7-7-7 7 7 7" />
           </svg>
@@ -99,17 +99,17 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <header className="mb-8 sm:mb-12">
           <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
             {post.tags.map(tag => (
-              <span key={tag} className="text-xs font-medium px-2.5 py-1 rounded-full bg-white/5 text-[#989898] border border-white/10">
+              <span key={tag} className="text-xs font-medium px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5 text-[#555] dark:text-[#989898] border border-black/10 dark:border-white/10">
                 {tag}
               </span>
             ))}
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight mb-3 sm:mb-4">{post.title}</h1>
-          <p className="text-[#989898] text-base sm:text-xl leading-relaxed mb-6 sm:mb-8">{post.subtitle}</p>
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-[#555] pb-6 sm:pb-8 border-b border-white/5">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black dark:text-white leading-tight mb-3 sm:mb-4">{post.title}</h1>
+          <p className="text-[#555] dark:text-[#989898] text-base sm:text-xl leading-relaxed mb-6 sm:mb-8">{post.subtitle}</p>
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-[#999] dark:text-[#555] pb-6 sm:pb-8 border-b border-black/10 dark:border-white/5">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-xs font-bold text-black">S</div>
-              <span className="text-[#989898]">Samrath Reddy</span>
+              <span className="text-[#555] dark:text-[#989898]">Samrath Reddy</span>
             </div>
             <span>·</span>
             <span>{new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
@@ -119,25 +119,23 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         </header>
 
         {/* Content */}
-        <article className="prose prose-invert prose-base sm:prose-lg max-w-none
-          prose-headings:text-white prose-headings:font-bold
-          prose-p:text-[#ccc] prose-p:leading-relaxed
-          prose-a:text-amber-400 prose-a:no-underline hover:prose-a:underline
-          prose-strong:text-white
-          prose-code:text-amber-300 prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
-          prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 prose-pre:rounded-xl prose-pre:overflow-x-auto
-          [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none [&_pre_code]:text-inherit [&_pre_code]:text-sm
+        <article className="prose dark:prose-invert prose-base sm:prose-lg max-w-none
+          prose-headings:font-bold
+          prose-p:leading-relaxed
+          prose-a:text-amber-600 dark:prose-a:text-amber-400 prose-a:no-underline hover:prose-a:underline
+          prose-code:text-amber-700 dark:prose-code:text-amber-300 prose-code:bg-black/8 dark:prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+          prose-pre:bg-[#1e1e1e] prose-pre:border prose-pre:border-black/10 dark:prose-pre:border-white/10 prose-pre:rounded-xl prose-pre:overflow-x-auto
+          [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none [&_pre_code]:text-[#d4d4d4] [&_pre_code]:text-sm
           [&_table]:overflow-x-auto [&_table]:block [&_table]:max-w-full
-          prose-blockquote:border-amber-500 prose-blockquote:text-[#989898]
-          prose-hr:border-white/10
-          prose-li:text-[#ccc]
+          prose-blockquote:border-amber-500
+          prose-hr:border-black/10 dark:prose-hr:border-white/10
         ">
           <MDXRemote source={post.content} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
         </article>
 
         {/* Footer */}
-        <div className="mt-16 pt-8 border-t border-white/5">
-          <Link href="/#projects" className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 transition-colors text-sm font-medium">
+        <div className="mt-16 pt-8 border-t border-black/10 dark:border-white/5">
+          <Link href="/#projects" className="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-500 dark:hover:text-amber-300 transition-colors text-sm font-medium">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>

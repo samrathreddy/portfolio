@@ -2,9 +2,10 @@
 
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Menu, Github, Linkedin, FileText, Code2, X } from "lucide-react"
+import { Menu, Github, Linkedin, FileText, Code2, X, Sun, Moon } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
 import { usePathname } from "next/navigation"
+import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
 
 export function NavHeader() {
@@ -20,6 +21,9 @@ export function NavHeader() {
   const [isNavbarVisible, setIsNavbarVisible] = useState(true)
 
   const portfolioText = "Samrath"
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   // Responsive breakpoints - enhanced for better device support
   const isMobile = windowWidth < 640 // sm breakpoint
@@ -191,13 +195,16 @@ export function NavHeader() {
       >
         <nav
           className={cn(
-            "relative w-full rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 transition-all duration-300 ease-in-out",
-            { 
+            "relative w-full rounded-2xl backdrop-blur-xl border transition-all duration-300 ease-in-out",
+            isBlogPage
+              ? "bg-white/80 dark:bg-black/80 border-black/10 dark:border-white/10"
+              : "bg-black/40 border-white/10",
+            {
               "opacity-0 translate-y-[-100%]": !isNavbarVisible && isMobile,
               "opacity-100 translate-y-0": isNavbarVisible || !isMobile
             }
           )}
-          style={getNavbarStyles()}
+          style={isBlogPage ? {} : getNavbarStyles()}
         >
           <div className={cn(
             "flex items-center justify-between",
@@ -205,7 +212,7 @@ export function NavHeader() {
           )}>
             {/* Logo/Brand */}
             {isBlogPage ? (
-              <Link href="/" className="text-white hover:text-white/80 transition-colors shrink-0">
+              <Link href="/" className="text-black dark:text-white hover:opacity-70 transition-opacity shrink-0">
                 <span className={cn(
                   "font-semibold",
                   isMobile ? "text-lg" : "text-xl"
@@ -301,11 +308,22 @@ export function NavHeader() {
               </div>
             )}
 
-            {/* Home link on blog pages - Desktop */}
+            {/* Home link + theme toggle on blog pages - Desktop */}
             {isDesktop && isBlogPage && (
-              <Link href="/" className="text-[#989898] hover:text-white transition-colors text-sm font-medium ml-auto">
-                Home
-              </Link>
+              <div className="flex items-center gap-4 ml-auto">
+                {mounted && (
+                  <button
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="p-2 rounded-lg text-[#989898] hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    aria-label="Toggle theme"
+                  >
+                    {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  </button>
+                )}
+                <Link href="/" className="text-[#989898] hover:text-black dark:hover:text-white transition-colors text-sm font-medium">
+                  Home
+                </Link>
+              </div>
             )}
 
             {/* Social Links and Resume Button - Desktop */}
@@ -393,11 +411,22 @@ export function NavHeader() {
               </div>
             )}
 
-            {/* Mobile Home link on blog pages */}
+            {/* Mobile Home link + theme toggle on blog pages */}
             {(isMobile || (isTablet && !isLargeTablet)) && isBlogPage && (
-              <Link href="/" className="text-[#989898] hover:text-white transition-colors text-sm font-medium">
-                Home
-              </Link>
+              <div className="flex items-center gap-3">
+                {mounted && (
+                  <button
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="p-2 rounded-lg text-[#989898] hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    aria-label="Toggle theme"
+                  >
+                    {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  </button>
+                )}
+                <Link href="/" className="text-[#989898] hover:text-black dark:hover:text-white transition-colors text-sm font-medium">
+                  Home
+                </Link>
+              </div>
             )}
 
             {/* Mobile Menu Button */}
