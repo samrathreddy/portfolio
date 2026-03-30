@@ -76,6 +76,8 @@ Rename `.env.example` to `.env` and configure:
 ## Features
 
 - **Responsive Design** — Looks great on desktop, tablet, and mobile
+- **Blog** — MDX-powered writing section with reading time, tags, and syntax-highlighted code blocks
+- **Light / Dark Theme** — Blog pages support full light and dark mode via `next-themes`, toggled from the navbar
 - **Meeting Scheduling** — Book, reschedule, and cancel meetings with Google Calendar + Meet integration
 - **Session Recording** — PostHog-powered session replays and event tracking
 - **Admin Dashboard** — Analytics for meetings, resume views, and downloads (IP-restricted)
@@ -91,7 +93,7 @@ Rename `.env.example` to `.env` and configure:
 | Category | Technologies |
 |---|---|
 | **Framework** | Next.js 14 |
-| **UI** | React 18, TailwindCSS, Framer Motion |
+| **UI** | React 18, TailwindCSS, Framer Motion, next-themes |
 | **Language** | TypeScript |
 | **Database** | MongoDB (Mongoose) |
 | **Auth** | Google OAuth 2.0 |
@@ -114,13 +116,16 @@ portfolio/
 │   │   ├── meetings/     # Meeting CRUD
 │   │   └── ...           # Slots, tracking, resume
 │   ├── admin/            # Admin dashboard pages
+│   ├── blog/             # Blog listing + post pages (light/dark themed)
 │   ├── meet/             # Meeting scheduling page
 │   ├── resume/           # Resume page
-│   ├── providers.tsx     # PostHog provider
+│   ├── providers.tsx     # PostHog + ThemeProvider
 │   ├── layout.tsx        # Root layout
 │   └── page.tsx          # Home page
 ├── components/           # React components
 ├── config/               # Project & site configuration
+├── content/
+│   └── blog/             # MDX blog posts
 ├── lib/                  # Utilities (DB, Google, CORS)
 ├── public/               # Static assets & tech logos
 └── middleware.ts         # CORS middleware
@@ -133,6 +138,8 @@ portfolio/
 | Route | Description |
 |---|---|
 | `/` | Landing page — hero, projects, tech stack, about |
+| `/blog` | Blog listing page with tags and reading time |
+| `/blog/[slug]` | Individual blog post — MDX rendered, light/dark theme toggle |
 | `/resume` | Resume viewer with download tracking |
 | `/meet` | Meeting scheduler with available time slots |
 | `/admin` | Dashboard with analytics overview |
