@@ -13,9 +13,24 @@ export interface Project {
     article?: string;
   };
   color: string;
+  badge?: string;
 }
 
 export const projects: Project[] = [
+  {
+    id: "agent-vox",
+    subtitle: "Voice AI Agent",
+    title: "AgentVox",
+    description: "A Jarvis-style voice AI agent that discovers its own capabilities at runtime. Connect Gmail, Slack, GitHub, Calendar and 100+ apps via OAuth - the agent dynamically builds its tool catalog each session with zero hardcoded actions. Built on LiveKit with NVIDIA Parakeet STT, Gemini 2.5 Flash, and Kyutai Pocket TTS.",
+    preview: "https://pub-83a02fbc2ba441fca05462fac2790e35.r2.dev/agentvox.mp4",
+    video: "https://pub-83a02fbc2ba441fca05462fac2790e35.r2.dev/agentvox.mp4",
+    tech: ["Python", "LiveKit", "Gemini 2.5 Flash", "NVIDIA Parakeet", "Pocket TTS", "Composio", "WebRTC"],
+    links: {
+      article: "/blog/agent-vox"
+    },
+    color: "from-[#8B5CF6] to-[#6D28D9]",
+    badge: "In Development"
+  },
   {
     id: "speakink",
     subtitle: "Voice Dictation App",

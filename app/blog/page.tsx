@@ -29,18 +29,18 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       <NavHeader />
-      <main className="max-w-3xl mx-auto px-6 pt-32 pb-24">
-        <div className="mb-16">
-          <h1 className="text-4xl font-bold text-white mb-4">Writing</h1>
-          <p className="text-[#989898] text-lg">Deep dives into projects, architecture decisions, and things I learned building stuff.</p>
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-24 sm:pt-32 pb-16 sm:pb-24">
+        <div className="mb-10 sm:mb-16">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">Writing</h1>
+          <p className="text-[#989898] text-base sm:text-lg">Deep dives into projects, architecture decisions, and things I learned building stuff.</p>
         </div>
 
         <div className="space-y-px">
           {posts.map((post) => (
-            <Link key={post.slug} href={`/blog/${post.slug}`} className="group block py-8 border-b border-white/5 hover:border-white/10 transition-colors">
+            <Link key={post.slug} href={`/blog/${post.slug}`} className="group block py-6 sm:py-8 border-b border-white/5 hover:border-white/10 transition-colors">
               <div className="flex items-start justify-between gap-6">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
                     {post.tags.map(tag => (
                       <span key={tag} className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/5 text-[#989898] border border-white/10">
                         {tag}

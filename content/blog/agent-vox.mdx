@@ -1,0 +1,171 @@
+---
+title: "I Built a Voice Agent That Figures Out What It Can Do on Its Own"
+subtitle: "AgentVox connects your voice to 100+ apps - Gmail, Slack, GitHub, Calendar - with zero hardcoded tools. The agent discovers its own capabilities at runtime."
+date: "2026-03-30"
+tags: ["Voice AI", "LiveKit", "Agent", "Side Project"]
+---
+
+Voice agents aren't really built for personal use. Look at what's actually out there: enterprise contact center software, customer support bots, IVR replacements. All of it is designed for businesses serving customers at scale, priced accordingly, and locked down so the agent only does exactly what the company configured it to do.
+
+The few personal assistant products that exist are either cloud-only subscriptions with opaque pricing, or demo-quality toys that can set a timer and not much else. And if you try to build one yourself using the standard approach - hook up an STT provider, an LLM, a TTS provider - you're looking at $0.10-0.15 per minute just in API costs before you've written a single line of your own logic. That adds up fast for something you'd actually use all day.
+
+I decided to build the thing I actually wanted: a voice agent that lives on my machine, connects to all the apps I already use, and costs next to nothing to run.
+
+<video controls playsInline className="w-full rounded-xl border border-white/10 my-6">
+  <source src="https://pub-83a02fbc2ba441fca05462fac2790e35.r2.dev/agentvox.mp4" type="video/mp4" />
+</video>
+
+AgentVox is a Jarvis-style voice AI that discovers what it can do at startup. You connect your apps once via OAuth, and from that point forward, you just talk to it. "Send a message to the engineering Slack channel", "create a GitHub issue", "schedule a meeting for Thursday at 2pm", "check what's in my inbox from last week" - it handles all of it, without any of those actions being written as code.
+
+The whole thing starts with `uv run python run.py` and is ready to talk in under 60 seconds. It's still actively in development - rough edges exist, but the core loop works.
+
+---
+
+## The Problem With Hardcoded Tools
+
+Most voice agents that do support actions are brittle in a specific way: every action they can take is hardcoded. Want to add "send a Slack message"? Write a function, register it as a tool, redeploy. Want to support Notion? Same thing. The agent knows exactly what it can do because a human manually told it, in code, before runtime.
+
+This breaks down fast. Every new integration is an engineering task. You have to write the function, test it, handle edge cases, document the parameters, and redeploy. Multiply that by 100+ apps and it becomes its own full-time job.
+
+There's a subtler problem too. Hardcoded tools are static - they can't reflect that you recently connected a new workspace or added a GitHub org. The agent's world is frozen at the moment someone last updated the code.
+
+The obvious fix: let the agent figure out what's available at runtime, every single session.
+
+---
+
+## How Dynamic Tool Discovery Works
+
+At startup, AgentVox runs a discovery phase. It connects to Composio - which handles OAuth and action catalogs for hundreds of apps - and asks: "what accounts are connected, and what can we do with each one?"
+
+The answer comes back as a flat list of actions. For a typical setup with Gmail, Slack, GitHub, and Google Calendar, that's 100+ distinct operations. Each one has a name, a description, and a parameter spec.
+
+That entire catalog gets injected into the system prompt before the first conversation starts.
+
+```python
+async def _build_tool_catalog(self) -> str:
+    connected = await self._get_connected_apps()
+    catalog_lines = []
+
+    for app in connected:
+        actions = await self._fetch_actions(app)
+        for action in actions:
+            catalog_lines.append(
+                f"- {action.name}: {action.description}"
+            )
+
+    return "\n".join(catalog_lines)
+```
+
+The LLM now knows exactly what's available - not from hardcoded function signatures, but from a live query to the user's actual connected integrations. When you ask "what can you do?", it's not reciting a canned list. It looked.
+
+---
+
+## One Tool to Execute Everything
+
+Here's where it gets interesting. Instead of registering 100+ individual tools, there's a single generic executor:
+
+```python
+async def execute_action(action_name: str, parameters: dict) -> str:
+    result = await composio.execute(
+        action=action_name,
+        params=parameters
+    )
+    return result
+```
+
+The LLM picks the right action name from the catalog, fills in the parameters, and calls `execute_action`. One function handles everything from "GMAIL_SEND_EMAIL" to "GITHUB_CREATE_ISSUE" to "GOOGLECALENDAR_CREATE_EVENT".
+
+This matters for reliability. When you have 100 hardcoded tools, there are 100 places things can go wrong, each with their own parameter handling, error paths, and edge cases. With one generic executor, there's one path. Much easier to reason about.
+
+---
+
+## The Voice Stack
+
+The full voice pipeline is built on LiveKit. When you speak, here's what happens:
+
+**VAD → STT → LLM → Tool Execution → TTS → Audio Out**
+
+- **STT:** NVIDIA Parakeet TDT 0.6B v2 over gRPC. Free API, genuinely excellent accuracy. The same model I wrote about in my [LiveKit post](/blog/livekit-voice-agent).
+- **LLM:** Gemini 2.5 Flash. Fast, handles long context well (important when you inject 100+ tool descriptions).
+- **TTS:** Kyutai Pocket TTS - 100M parameter model, runs at 6× realtime on CPU, 8 available voices, zero per-character cost.
+- **VAD:** Silero VAD with multilingual turn detection, tuned to `activation_threshold=0.65` to reduce false triggers in noisier environments.
+
+End-to-end latency sits around 400-600ms. Fast enough that the conversation feels natural.
+
+One practical detail: models get loaded once in a `prewarm` function before the first call. VAD, TTS, and the NVIDIA gRPC connection are all ready before any user connects. No cold-start latency on first turn.
+
+---
+
+## The Verification Trick
+
+Voice agents have an inherent problem: STT can mishear things. "Send a message to John" might transcribe as "Send a message to Don". For destructive actions - sending emails, creating issues, deleting things - silent misrecognition is a real risk.
+
+AgentVox's system prompt has a hard rule: **before any send, create, or delete operation, read back the exact content out loud and wait for confirmation.**
+
+```
+CRITICAL: Before sending any message, email, or creating/deleting anything,
+read back the exact content and recipients. Ask "Should I go ahead?"
+Wait for explicit confirmation before executing.
+```
+
+It also pre-fetches to reduce guesswork. Before sending a Slack message, it lists all channels first. Before a GitHub action, it fetches the user's repo list. This way the LLM is selecting from real names rather than guessing at IDs.
+
+---
+
+## Connecting New Apps Mid-Conversation
+
+One of the more satisfying parts: you can connect a new app without stopping. Say you're mid-conversation and realize you want to use Linear for the first time.
+
+```
+You: "Can you create a Linear issue for this?"
+Agent: "I don't see Linear connected. Want me to set that up?"
+You: "Yes"
+Agent: [triggers OAuth flow] "You're connected. Refreshing my tools..."
+Agent: [re-discovers actions] "Got it. I can now create issues, update
+       statuses, and search your Linear workspace. What's the issue?"
+```
+
+The agent calls `refresh_tools()`, re-runs discovery, and picks up right where it left off. No restart, no config change.
+
+---
+
+## API Orchestration Layer
+
+Right now, AgentVox uses Composio for tool discovery and execution - it's a proof of concept to validate the idea. Composio handles the OAuth plumbing and gives you a catalog of actions across hundreds of apps without writing any integration code yourself. That was the right call for getting something working fast.
+
+But the long-term vision is different. The agent shouldn't need a third-party platform to know what it can do. A truly intelligent agent would look at your connected accounts, read the available APIs, reason about what actions make sense for your request, and construct the call itself. No pre-built catalog. No intermediary. Just the agent figuring it out.
+
+That's what I'm actively building toward - a custom API orchestration layer that sits between the agent and your apps directly. The goals: make the agent less dependent on any single integration platform, add things Composio doesn't handle well out of the box (request deduplication, retry logic with backoff, per-action rate limiting, response caching for read-heavy operations), and eventually get to a place where the agent can reason about APIs it's never seen before.
+
+The generic executor pattern makes this a clean migration. Everything flows through one path, so swapping the underlying integration layer doesn't touch the rest of the system.
+
+---
+
+## Running It
+
+The repo is at [github.com/samrathreddy/agentvox](https://github.com/samrathreddy/agentvox).
+
+```bash
+git clone https://github.com/samrathreddy/agentvox
+cd agentvox
+cp .env.example .env  # add your API keys
+uv run python run.py
+```
+
+You'll need four things: a LiveKit account (free tier works), a Google AI API key for Gemini, an NVIDIA API key for Parakeet, and a Composio API key. Connect your apps in the Composio dashboard, run the command, and you're talking to your stack.
+
+Debug mode (`run.py --debug`) opens a three-pane TMUX view showing live logs from LiveKit, the agent worker, and the voice client simultaneously. Useful for tracking exactly where time goes in the pipeline.
+
+---
+
+## What I'd Build Next
+
+The dynamic tool discovery approach opens up some interesting directions:
+
+**Better action selection.** With 100+ tools, the LLM occasionally picks a reasonable-but-wrong action. A lightweight pre-retrieval step - embedding the user's intent and finding the closest matching actions before passing them to the LLM - would reduce these mistakes significantly.
+
+**Multi-agent delegation.** Long-running tasks (scraping something, processing a file, multi-step workflows) don't belong in a voice loop where the user is waiting. A background worker that the voice agent can hand tasks off to - "I'll take care of that and let you know when it's done" - feels like the right model.
+
+**Memory across sessions.** Right now each conversation starts fresh. Adding a lightweight persistent context - recent actions, user preferences, frequently used apps - would make the agent feel more like a real assistant and less like a fresh install every time.
+
+The zero-hardcoded-tools constraint turns out to be a surprisingly useful forcing function. It pushes you toward building something that's actually general rather than a curated demo.

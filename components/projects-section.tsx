@@ -234,9 +234,16 @@ export function ProjectsSection({
                           >
                             {project.subtitle}
                           </div>
-                         <h3 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50 transform transition-transform duration-500 group-hover:translate-x-2">
-                            {project.title}
-                          </h3>
+                         <div className="flex items-center gap-3 mb-4">
+                            <h3 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50 transform transition-transform duration-500 group-hover:translate-x-2">
+                              {project.title}
+                            </h3>
+                            {project.badge && (
+                              <span className="text-xs font-medium px-2 py-0.5 rounded-full border border-amber-400/40 text-amber-400 bg-amber-400/10 whitespace-nowrap">
+                                {project.badge}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-gray-400 text-lg mb-6 transition-colors duration-500 group-hover:text-gray-300">
                             {project.description}
                           </p>
@@ -404,7 +411,7 @@ export function ProjectsSection({
                                     }}
                                   />
                                   {/* Tap-to-unmute overlay — only for projects with meaningful audio */}
-                                  {project.id === "speakink" && mutedVideos[project.id] !== true && (
+                                  {(project.id === "speakink" || project.id === "agent-vox") && mutedVideos[project.id] !== true && (
                                     <div
                                       className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer"
                                       onClick={() => {
@@ -520,9 +527,16 @@ export function ProjectsSection({
                           >
                             {project.subtitle}
                           </div>
-                          <h3 className="text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50 transform transition-transform duration-500 group-hover:translate-x-2">
-                            {project.title}
-                          </h3>
+                          <div className="flex items-center gap-3 mb-6">
+                            <h3 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50 transform transition-transform duration-500 group-hover:translate-x-2">
+                              {project.title}
+                            </h3>
+                            {project.badge && (
+                              <span className="text-xs font-medium px-2 py-0.5 rounded-full border border-amber-400/40 text-amber-400 bg-amber-400/10 whitespace-nowrap">
+                                {project.badge}
+                              </span>
+                            )}
+                          </div>
 
                           {/* Mobile Video Preview - Only show if video exists and on mobile */}
                           {project.video && isMobile && (
@@ -544,8 +558,8 @@ export function ProjectsSection({
                                 playsInline
                                 controls={false}
                               />
-                              {/* Tap-for-audio overlay (speakink only) */}
-                              {project.id === "speakink" && mutedVideos[`mobile-${project.id}`] !== true && (
+                              {/* Tap-for-audio overlay (speakink + agent-vox) */}
+                              {(project.id === "speakink" || project.id === "agent-vox") && mutedVideos[`mobile-${project.id}`] !== true && (
                                 <div
                                   className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer"
                                   onClick={() => {
