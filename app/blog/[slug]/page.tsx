@@ -117,8 +117,6 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             <span>{new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
             <span>·</span>
             <span>{post.readingTime}</span>
-            <span>·</span>
-            <WalinePageview path={`/blog/${params.slug}`} update={true} />
           </div>
         </header>
 
@@ -136,6 +134,11 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         ">
           <MDXRemote source={post.content} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
         </article>
+
+        {/* Silent pageview counter - tracks views without displaying */}
+        <div className="hidden">
+          <WalinePageview path={`/blog/${params.slug}`} update={true} />
+        </div>
 
         {/* Comments */}
         <WalineComments path={`/blog/${params.slug}`} />
